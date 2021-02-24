@@ -33,6 +33,10 @@ from evennia.settings_default import *
 
 # This is the name of your game. Make it catchy!
 SERVERNAME = "mygame"
+BASE_CHARACTER_TYPECLASS = "typeclasses.persōnae.Persōna"
+BASE_OBJECT_TYPECLASS = "typeclasses.rēs.Rēs"
+BASE_ROOM_TYPECLASS = "typeclasses.rēs.Rēs"
+BASE_EXIT_TYPECLASS = "typeclasses.rēs.Rēs"
 
 
 ######################################################################
