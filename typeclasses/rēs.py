@@ -10,10 +10,9 @@ the other types, you can do so by adding this as a multiple
 inheritance.
 
 """
-from evennia import DefaultObject
+from typeclasses.inflected_noun import InflectedNoun
 
-
-class Rēs(DefaultObject):
+class Rēs(InflectedNoun):
     """
     This is the root typeclass object, implementing an in-game Evennia
     game object, such as having a location, being able to be

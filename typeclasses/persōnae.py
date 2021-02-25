@@ -9,8 +9,9 @@ creation commands.
 """
 from evennia import DefaultCharacter
 
+from typeclasses.inflected_noun import InflectedNoun
 
-class Persōna(DefaultCharacter):
+class Persōna(DefaultCharacter,InflectedNoun):
     """
     The Character defaults to reimplementing some of base Object's hook methods with the
     following functionality:
