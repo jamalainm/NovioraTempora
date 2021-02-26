@@ -1,16 +1,14 @@
 """
-Object
-
-The Object is the "naked" base class for things in the game world.
-
-Note that the default Character, Room and Exit does not inherit from
-this Object, but from their respective default implementations in the
-evennia library. If you want to use this class as a parent to change
-the other types, you can do so by adding this as a multiple
-inheritance.
+In order to make proper use of the Rēs typeclass, at object creation
+the following must be specified:
+    1) a nominative singular form for the noun
+    2) a genitive singular form for the noun
+    3) a grammatical gender for the noun
 
 """
 from typeclasses.inflected_noun import InflectedNoun
+# from evennia import DefaultObject
+# from utils.latin_language.populate_forms import populate_forms
 
 class Rēs(InflectedNoun):
     """

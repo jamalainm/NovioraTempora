@@ -1,4 +1,4 @@
-from evennia.utils.test_resources import LocalEvenniaTest
+from evennia.utils.test_resources import LocalEvenniaTest, EvenniaTest
 from evennia.objects.tests import *
 from typeclasses.persōnae import Persōna
 from typeclasses.rēs import Rēs
@@ -14,7 +14,16 @@ class DefaultObjectTest(LocalEvenniaTest):
         home = self.room1.dbref
 
         obj, errors = Rēs.create(
-            "trashcan", self.account, description=description, ip=self.ip, home=home
+                "corbula", 
+                self.account, 
+                description=description, 
+                ip=self.ip, 
+                home=home, 
+                attributes=[
+                    ('formae', {'nom_sg': ['corbula'], 'gen_sg': ['corbulae']},
+                        ),
+                    ('sexus', 'muliebre'),
+                    ]
         )
         self.assertTrue(obj, errors)
         self.assertFalse(errors, errors)
@@ -93,3 +102,26 @@ class TestObjectManager(TestObjectManager):
         )
         self.assertEqual(list(query), [self.char1])
 
+    def test_copy_object(self):
+        "Test that all attributes and tags properly copy across objects"
+
+        # Add some tags
+        self.obj1.tags.add("plugh", category="adventure")
+        self.obj1.tags.add("xyzzy")
+
+        # Add some attributes
+        self.obj1.attributes.add("phrase", "plugh", category="adventure")
+        self.obj1.attributes.add("phrase", "xyzzy")
+
+        # Create object copy
+        obj2 = self.obj1.copy()
+
+        # Make sure each of the tags were replicated
+        self.assertTrue("plugh" in obj2.tags.all())
+        self.assertTrue("plugh" in obj2.tags.get(category="adventure"))
+        self.assertTrue("xyzzy" in obj2.tags.all())
+
+        # Make sure each of the attributes were replicated
+        self.assertEqual(obj2.attributes.get(key="phrase"), "xyzzy")
+        self.assertEqual(self.obj1.attributes.get(key="phrase", category="adventure"), "plugh")
+        self.assertEqual(obj2.attributes.get(key="phrase", category="adventure"), "plugh")
