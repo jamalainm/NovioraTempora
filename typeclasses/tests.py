@@ -30,19 +30,72 @@ class DefaultObjectTest(LocalEvenniaTest):
         self.assertEqual(description, obj.db.desc)
         self.assertEqual(obj.db.creator_ip, self.ip)
         self.assertEqual(obj.db_home, self.room1)
+        self.assertEqual(obj.db.formae['acc_sg'][0],'corbulam')
+        self.assertEqual(obj.db.sexus,'muliebre')
 
-    def test_character_create(self):
-        description = "A furry green monster, reeking of garbage."
+    def test_fem_character_create(self):
         home = self.room1.dbref
 
-        obj, errors = Persōna.create(
-            "oscar", self.account, description=description, ip=self.ip, home=home
-        )
-        self.assertTrue(obj, errors)
+        # Feminine Character
+        obj_fem, errors = Persōna.create(
+            "Gaia Iūlia", self.account, ip=self.ip, home=home,
+            attributes=[
+                ('formae',{'nom_sg': ['Gaia','Iūlia'],'gen_sg': ['Gaiae','Iūliae']}),
+                ('sexus','muliebre'),
+                ('nōmen','Iūlia'),
+                ('gens','Iūlia'),
+                ('praenōmen','Gaia'),
+                ])
+        self.assertTrue(obj_fem, errors)
         self.assertFalse(errors, errors)
-        self.assertEqual(description, obj.db.desc)
-        self.assertEqual(obj.db.creator_ip, self.ip)
-        self.assertEqual(obj.db_home, self.room1)
+#        self.assertEqual(description, obj.db.desc)
+        self.assertEqual(obj_fem.db.creator_ip, self.ip)
+        self.assertEqual(obj_fem.db_home, self.room1)
+        self.assertEqual(obj_fem.db.formae['acc_sg'][0], 'Gaiam')
+        self.assertEqual(obj_fem.db.formae['acc_sg'][1], 'Iūliam')
+        self.assertEqual(obj_fem.db.sexus, 'muliebre')
+        for i in obj_fem.db.ingenia.values():
+            self.assertNotEqual(i,0)
+        self.assertTrue(obj_fem.db.handedness)
+        self.assertGreater(obj_fem.db.pv['max'],0)
+        self.assertGreater(obj_fem.db.pv['nunc'],0)
+        self.assertGreater(obj_fem.db.toll_fer['tollere'],0)
+        self.assertGreater(obj_fem.db.toll_fer['impedīta'],0)
+        self.assertGreater(obj_fem.db.toll_fer['impedītissima'],0)
+        self.assertEqual(obj_fem.db.toll_fer['ferēns'],0)
+        self.assertGreater(obj_fem.db.toll_fer['max'],0)
+
+    def test_masc_character_create(self):
+        home = self.room1.dbref
+
+        # Masculine Character
+        obj_masc, errors = Persōna.create(
+            "Opiter Cornēlius", self.account, ip=self.ip, home=home,
+            attributes=[
+                ('formae',{'nom_sg': ['Opiter','Cornēlius'],'gen_sg': ['Opitris','Cornēliī']}),
+                ('sexus','māre'),
+                ('nōmen','Cornēlius'),
+                ('gens','Cornēlia'),
+                ('praenōmen','Opiter'),
+                ])
+        self.assertTrue(obj_masc, errors)
+        self.assertFalse(errors, errors)
+#        self.assertEqual(description, obj.db.desc)
+        self.assertEqual(obj_masc.db.creator_ip, self.ip)
+        self.assertEqual(obj_masc.db_home, self.room1)
+        self.assertEqual(obj_masc.db.formae['acc_sg'][0], 'Opitrem')
+        self.assertEqual(obj_masc.db.formae['acc_sg'][1], 'Cornēlium')
+        self.assertEqual(obj_masc.db.sexus, 'māre')
+        for i in obj_masc.db.ingenia.values():
+            self.assertNotEqual(i,0)
+        self.assertTrue(obj_masc.db.handedness)
+        self.assertGreater(obj_masc.db.pv['max'],0)
+        self.assertGreater(obj_masc.db.pv['nunc'],0)
+        self.assertGreater(obj_masc.db.toll_fer['tollere'],0)
+        self.assertGreater(obj_masc.db.toll_fer['impedīta'],0)
+        self.assertGreater(obj_masc.db.toll_fer['impedītissima'],0)
+        self.assertEqual(obj_masc.db.toll_fer['ferēns'],0)
+        self.assertGreater(obj_masc.db.toll_fer['max'],0)
 
     def test_character_create_noaccount(self):
         obj, errors = Persōna.create("oscar", None, home=self.room1.dbref)
