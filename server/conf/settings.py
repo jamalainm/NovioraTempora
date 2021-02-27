@@ -38,6 +38,11 @@ BASE_OBJECT_TYPECLASS = "typeclasses.rēs.Rēs"
 BASE_ROOM_TYPECLASS = "typeclasses.locī.Locus"
 BASE_EXIT_TYPECLASS = "typeclasses.exitūs.Exitus"
 
+MULTISESSION_MODE = 2
+
+INSTALLED_APPS += ('web.chargen',)
+
+DEBUG = True
 
 ######################################################################
 # Settings given in secret_settings.py override those in this file.
