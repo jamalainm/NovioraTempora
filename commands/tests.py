@@ -117,7 +117,7 @@ class ItemEncumbranceTestCase(CommandTest):
                 ])
 
 
-    def test_cape(self):
+    def test_cape_relinque(self):
         hands = ['sinistrā', 'dextrā']
         hands.remove(self.char1.db.handedness)
         off_hand = hands[0]
@@ -154,3 +154,15 @@ class ItemEncumbranceTestCase(CommandTest):
 
         # Make sure something can't be picked up with both hands full
         self.call(Cape(), self.obj3.db.formae['acc_sg'][0], "Manūs tuae sunt plēnae!")
+
+        # See if we get success message for dropping something
+        self.call(Relinque(), self.obj1.db.formae['acc_sg'][0], f"{self.obj1.db.formae['acc_sg'][0]} relīquistī.|Vīta: {self.char1.db.pv['nunc']}/{self.char1.db.pv['max']})")
+
+        # Check that the encumberance has been updated
+        self.assertEqual(self.char1.db.toll_fer['ferēns'],self.obj2.db.physical['massa'])
+
+        # Make sure that the hand holding the object has been freed up
+        self.assertIn(self.char1.db.handedness,self.char1.db.manibus_vacuīs)
+        self.assertEqual(len(self.char1.db.manibus_plēnīs),1)
+        self.assertEqual(len(self.char1.db.manibus_vacuīs),1)
+        self.assertIn(off_hand,self.char1.db.manibus_plēnīs)

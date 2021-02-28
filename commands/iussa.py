@@ -121,15 +121,15 @@ class Cape(MuxCommand):
             if current_carry + target_mass > carry_max:
                 caller.msg("Tantum ponderis ferre nōn potes!")
                 return
-            else:
-                caller.db.toll_fer['ferēns'] += target_mass
 
             # Check to see if hands are free;
             # If so, put into dominant hand, if free
             if len(caller.db.manibus_plēnīs) >= 2:
                 caller.msg("Manūs tuae sunt plēnae!")
-            else:
-                put_into_hand(caller, target)
+                return
+
+            put_into_hand(caller, target)
+            caller.db.toll_fer['ferēns'] += target_mass
 
             caller.msg(f"{target.db.formae['acc_sg'][0]} cēpistī.")
             caller.location.msg_contents(
@@ -147,6 +147,65 @@ class Cape(MuxCommand):
         target.move_to(caller, quiet=True)
         target.at_get(caller)
 
+class Relinque(MuxCommand):
+    """
+    Get rid of something
+    
+    Usage:
+        relinque <rem>
+
+    Lets you move an object from your inventory into the location
+    that you currently occupy.
+    """
+
+    key = "relinque"
+    locks = "cmd:all()"
+    help_category = "Iussa Latīna"
+    auto_help = True
+
+    def func(self):
+        """ Implement command """
+
+        caller = self.caller
+        current_carry = caller.db.toll_fer['ferēns']
+        
+        if not self.arglist or len(self.arglist) != 1:
+            caller.msg("Quid relinquere velis?")
+            return
+
+        # Ensure the intended object is targeted
+        stuff = caller.contents
+        target, self.args = which_one(self.args, caller, stuff)
+        if not target:
+            return
+
+        # Check the grammar
+        if check_case(caller, target, self.args, 'acc_sg') == False:
+            return
+
+        # Call the object's scripts at_before_drop() method
+        if not target.at_before_drop(caller):
+            return
+
+        # Adding the following to deal with clothing:
+        if target.db.tenētur:
+            # New helper function to manage occupied hands
+            take_out_of_hand(caller,target)
+#        if target.db.geritur:
+#            target.remove(caller,quiet=True)
+
+        # Lighten the callers toll_fer['ferēns']
+        target_mass = target.db.physical['massa']
+        caller.db.toll_fer['ferēns'] -= target_mass
+
+        # Move object to caller's location
+        target.move_to(caller.location, quiet=True)
+        caller.msg(f"{target.db.formae['acc_sg'][0]} relīquistī.")
+        caller.location.msg_contents(f"{caller.name} {target.db.formae['acc_sg'][0]} relīquit.", exclude=caller)
+
+        # call the object script's at_drop() method.
+        target.at_drop(caller)
+
 class IussaLatīnaCmdSet(default_cmds.CharacterCmdSet):
     """
     Command set for the Latin commands.
@@ -160,3 +219,4 @@ class IussaLatīnaCmdSet(default_cmds.CharacterCmdSet):
         """
         super().at_cmdset_creation()
         self.add(Cape())
+        self.add(Relinque())
