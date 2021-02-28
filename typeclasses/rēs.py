@@ -6,11 +6,11 @@ the following must be specified:
     3) a grammatical gender for the noun
 
 """
-from typeclasses.inflected_noun import InflectedNoun
-# from evennia import DefaultObject
-# from utils.latin_language.populate_forms import populate_forms
+# from typeclasses.inflected_noun import InflectedNoun
+from evennia import DefaultObject
+from utils.latin_language.populate_forms import populate_forms
 
-class Rēs(InflectedNoun):
+class Rēs(DefaultObject):
     """
     This is the root typeclass object, implementing an in-game Evennia
     game object, such as having a location, being able to be
@@ -156,4 +156,37 @@ class Rēs(InflectedNoun):
 
      """
 
-    pass
+    def basetype_posthook_setup(self):
+
+        # add all of the case endings to attributes
+        if hasattr(self, 'db'):
+            if self.db.formae:
+                if len(self.db.formae['nom_sg']) > 1:
+                    nōmen_nom = self.db.formae['nom_sg'][1]
+                    nōmen_gen = self.db.formae['gen_sg'][1]
+
+
+                nominative = self.db.formae['nom_sg'][0]
+                genitive = self.db.formae['gen_sg'][0]
+                sexus = self.db.sexus
+
+                populate_forms(self, nominative, genitive, sexus)
+
+                # Check if there is a nōmen for this character
+                if len(self.db.formae['nom_sg']) > 1:
+
+                    populate_forms(self, nōmen_nom, nōmen_gen, sexus)
+
+                self.db.Latin = True
+
+#    def at_get(getter):
+#        mass = 0
+#        if hasattr(self, 'db'):
+#            if self.db.physical:
+#                if self.db.physical['massa']:
+#                    mass = self.db.physical['massa']
+#
+#        if hasattr(getter, 'db'):
+#            if getter.db.toll_fer and self.db.physical:
+#                getter.db.toll_fer['ferēns'] += mass
+#

@@ -10,11 +10,13 @@ creation commands.
 from evennia import DefaultCharacter
 
 from typeclasses.inflected_noun import InflectedNoun
+from commands import default_cmdsets
 from utils.latin_language.populate_forms import populate_forms
 
 import random
 
-class Persōna(DefaultCharacter,InflectedNoun):
+# class Persōna(DefaultCharacter,InflectedNoun):
+class Persōna(DefaultCharacter):
     """
     The Character defaults to reimplementing some of base Object's hook methods with the
     following functionality:
@@ -34,6 +36,9 @@ class Persōna(DefaultCharacter,InflectedNoun):
     at_post_puppet - Echoes "AccountName has entered the game" to the room.
 
     """
+
+    def at_object_creation(self):
+        self.cmdset.add_default(default_cmdsets.PersōnaCmdSet, permanent=True)
 
     def basetype_posthook_setup(self):
 
@@ -56,7 +61,7 @@ class Persōna(DefaultCharacter,InflectedNoun):
 
                     populate_forms(self, nōmen_nom, nōmen_gen, sexus)
 
-                self.db.lang = 'latin'
+                self.db.Latin = True
 
                 # assign handedness
                 if random.random() >= 0.9:
