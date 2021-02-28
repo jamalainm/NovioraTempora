@@ -42,9 +42,9 @@ def put_into_hand(recipient, target):
         recipient.db.manibus_vacuīs.remove(dom_hand)
         recipient.db.manibus_plēnīs.append(dom_hand)
     else:
-        target.tenētur = off_hand
+        target.db.tenētur = off_hand
         recipient.db.manibus_vacuīs.remove(off_hand)
-        recipient.db.manibus_vacuīs.append(off_hand)
+        recipient.db.manibus_plēnīs.append(off_hand)
 
 def take_out_of_hand(loser, target):
     """

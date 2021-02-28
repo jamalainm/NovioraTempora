@@ -51,20 +51,54 @@ class ItemEncumbranceTestCase(CommandTest):
         )
 
         self.obj2, errors = Rēs.create(
-            key="vacca", location=self.room1, home=self.room1,
+            key="lāna", location=self.room1, home=self.room1,
             # adding this for unit testing of Latin
             attributes=[
-                ('formae', {'nom_sg': ['vacca'], 'gen_sg': ['vaccae']}),
+                ('formae', {'nom_sg': ['lāna'], 'gen_sg': ['lānae']}),
                 ('latin',True),
                 ('sexus', 'muliebre'),
                 ('physical',{
-                    'māteria': 'carō',
+                    'māteria': 'lāna',
                     'rigēns': False,
-                    'litra': 100,
-                    'x': 2.6,
-                    'y': 1.8,
-                    'z': 0.8,
-                    'massa': 907
+                    'litra': 23,
+                    'massa': 3
+                    }
+                    )
+                ]
+        )
+
+        self.obj3, errors = Rēs.create(
+            key="lūmen", location=self.room1, home=self.room1,
+            # adding this for unit testing of Latin
+            attributes=[
+                ('formae', {'nom_sg': ['lūmen'], 'gen_sg': ['lūminis']}),
+                ('latin',True),
+                ('sexus', 'neutrum'),
+                ('physical',{
+                    'māteria': 'argilla',
+                    'rigēns': True,
+                    'litra': 0.2,
+                    'massa': 0.15,
+                    'x': 0.05,
+                    'y': 0.05,
+                    'z': 0.08
+                    }
+                    )
+                ]
+        )
+
+        self.obj4, errors = Rēs.create(
+            key="focus", location=self.room1, home=self.room1,
+            # adding this for unit testing of Latin
+            attributes=[
+                ('formae', {'nom_sg': ['focus'], 'gen_sg': ['focī']}),
+                ('latin',True),
+                ('sexus', 'māre'),
+                ('physical',{
+                    'māteria': 'marmor',
+                    'rigēns': True,
+                    'litra': 3140,
+                    'massa': 8512,
                     }
                     )
                 ]
@@ -84,9 +118,39 @@ class ItemEncumbranceTestCase(CommandTest):
 
 
     def test_cape(self):
-        """ test that cape get hook properly affects encumbrance """
+        hands = ['sinistrā', 'dextrā']
+        hands.remove(self.char1.db.handedness)
+        off_hand = hands[0]
+
+        # Ensure that caller can't take themselves
+        self.call(Cape(), self.char1.db.formae['acc_sg'][0], "Tū tē capere nōn potes!")
+
+        # start with no encumberance
         self.assertEqual(self.char1.db.toll_fer['ferēns'], 0)
+
+        # Shouldn't be able to pick up this heavy hearth
+        self.call(Cape(), self.obj4.db.formae['acc_sg'][0], f"Tantum ponderis ferre nōn potes!|Vīta: {self.char1.db.pv['nunc']}/{self.char1.db.pv['max']})")
+
+        # See if we get the success message for picking something up
         self.call(Cape(), self.obj1.db.formae['acc_sg'][0], f"{self.obj1.db.formae['acc_sg'][0]} cēpistī.|Vīta: {self.char1.db.pv['nunc']}/{self.char1.db.pv['max']})")
+
+        # Ensure the encumberance matches
         self.assertEqual(self.char1.db.toll_fer['ferēns'],self.obj1.db.physical['massa'])
 
+        # Ensure that dominant hand does the picking up
+        self.assertIn(self.char1.db.handedness,self.char1.db.manibus_plēnīs)
 
+        # See if we get the success message for picking up a second object
+        self.call(Cape(), self.obj2.db.formae['acc_sg'][0], f"{self.obj2.db.formae['acc_sg'][0]} cēpistī.|Vīta: {self.char1.db.pv['nunc']}/{self.char1.db.pv['max']})")
+
+        # Ensure the encumberance accounts for both objects
+        self.assertEqual(self.char1.db.toll_fer['ferēns'],self.obj1.db.physical['massa'] + self.obj2.db.physical['massa'])
+
+        # Make sure full hands = 2
+        self.assertIn(off_hand,self.char1.db.manibus_plēnīs)
+
+        # Make sure empty hands = 0
+        self.assertEqual(len(self.char1.db.manibus_vacuīs),0)
+
+        # Make sure something can't be picked up with both hands full
+        self.call(Cape(), self.obj3.db.formae['acc_sg'][0], "Manūs tuae sunt plēnae!")

@@ -112,20 +112,24 @@ class Cape(MuxCommand):
             carry_max = caller.db.toll_fer['max']
             target_mass = target.db.physical['massa']
 
+            # Make sure proper syntax was used
+            if check_case(caller, target, self.args, 'acc_sg') == False:
+                return
+
+            # Check to see if character can carry any more weight;
+            # Add target mass to burden if caller can carry more
+            if current_carry + target_mass > carry_max:
+                caller.msg("Tantum ponderis ferre nōn potes!")
+                return
+            else:
+                caller.db.toll_fer['ferēns'] += target_mass
+
             # Check to see if hands are free;
             # If so, put into dominant hand, if free
             if len(caller.db.manibus_plēnīs) >= 2:
                 caller.msg("Manūs tuae sunt plēnae!")
             else:
                 put_into_hand(caller, target)
-
-            # Check to see if character can carry any more weight;
-            # Add target mass to burden if caller can carry more
-            if current_carry + target_mass > carry_max:
-                caller.msg("Plūs ponderis ferre nōn potes!")
-                return
-            else:
-                caller.db.toll_fer['ferēns'] += target_mass
 
             caller.msg(f"{target.db.formae['acc_sg'][0]} cēpistī.")
             caller.location.msg_contents(
