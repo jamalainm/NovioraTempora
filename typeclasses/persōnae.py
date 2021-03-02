@@ -9,7 +9,8 @@ creation commands.
 """
 from evennia import DefaultCharacter
 
-from typeclasses.inflected_noun import InflectedNoun
+# from typeclasses.inflected_noun import InflectedNoun
+# from commands.vestīre import VestītaPersōnaCmdSet
 from commands import default_cmdsets
 from utils.latin_language.populate_forms import populate_forms
 

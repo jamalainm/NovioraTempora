@@ -436,6 +436,6 @@ class IussaLatīnaCmdSet(default_cmds.CharacterCmdSet):
         """
         super().at_cmdset_creation()
         self.add(Cape())
-        self.add(Relinque())
-        self.add(Da())
+#        self.add(Relinque())
+#        self.add(Da())
         self.add(Dīc())
