@@ -17,5 +17,5 @@ def populate_forms(self,nom,gen,gender):
         else:
             self.db.formae.update({key: [value]})
 
-    for form in forms.items():
+    for form in forms.values():
         self.aliases.add(form)

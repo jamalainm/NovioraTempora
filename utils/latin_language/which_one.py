@@ -21,7 +21,7 @@ def which_one(args, caller, stuff):
 
         # if nothing was found, provide feedback
         if len(same) == 0:
-            caller.msg("Nōn invēnistī!")
+            caller.msg(f"Nōn invēnistī '{args}'!")
             return None, args
 
         # if fewer objects are found than specified, provide feedback
@@ -48,7 +48,7 @@ def which_one(args, caller, stuff):
 
         # if nothing is found, provide feedback
         if len(same) == 0:
-            caller.msg("Nōn invēnistī!")
+            caller.msg(f"Nōn invēnistī '{args}'!")
             return None, args
 
         # if more than one item is found, provide feedback
