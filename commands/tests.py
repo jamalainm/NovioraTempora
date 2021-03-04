@@ -7,8 +7,65 @@ from utils.sample_objs import sample_obj, sample_char, sample_room
 from typeclasses.persōnae import Persōna
 from typeclasses.rēs import Rēs
 from typeclasses.locī import Locus
+from typeclasses.vestīmenta import Vestīmentum
 
 from commands.iussa import *
+
+class IndueExueTestCase(CommandTest):
+
+    """ Test case for 'indue' (wear) and 'exue' (take off) """
+
+    character_typeclass = Persōna
+    object_typeclass = Vestīmentum
+
+    def setUp(self):
+        super(IndueExueTestCase, self).setUp()
+        # Set up sample character 1
+        self.char1, errors = Persōna.create(
+            "Gaia Iūlia", home=self.room1, location=self.room1.dbref,
+            attributes=[
+                ('formae',{'nom_sg': ['Gaia','Iūlia'],'gen_sg': ['Gaiae','Iūliae']}),
+                ('sexus','muliebre'),
+                ('nōmen','Iūlia'),
+                ('gens','Iūlia'),
+                ('latin',True),
+                ('praenōmen','Gaia'),
+                ])
+
+        self.obj1, errors = Rēs.create(
+                "pallium", home=self.room1, locations=self.char1,
+                attributes=[
+                    ('formae',{'nom_sg': ['pallium'],'gen_sg': ['palliī']}),
+                    ('sexus','neutrum'),
+                    ('latin',True),
+                    ('genusVestīmentōrum','cloak'),
+                    ('physical',{'massa':3}),
+                    ]
+                )
+
+        self.char1.db.toll_fer['ferēns'] = self.obj1.db.physical['massa']
+        self.obj.db.tenēutr = self.char1.db.handedness
+        self.char1.db.manibus_plēnīs.append(self.char1.db.handedness)
+        self.char1.db.manibus_vacuīs.remove(self.char1.db.handedness)
+
+        def test_indue(self):
+
+            # Ensure we get the right message
+            self.call(Indue(), self.obj1.db.formae['acc_sg'],f'|Vīta: {self.char1.db.pv["nunc"]}/{self.char1.db.pv["max"]})') 
+
+            # make sure that held item is out of hands
+            assertFalse(self.obj1.db.tenētur)
+            assertTrue(self.obj1.db.geritur)
+            assertIn(self.char1.db.handedness,self.char1.db.manibus_vacuīs)
+            assertEqual(len(self.char1.db.manibus_plēnīs),0)
+            assertEqual(self.char1.db.toll_fer['ferēns'],self.obj1.db.physical['massa'])
+
+            # make sure that after taking something off it's in hands
+            assertEqual(self.obj1.db.tenētur,self.char1.db.handedness)
+            assertFalse(self.obj1.db.geritur)
+            assertIn(self.char1.db.handedness,self.char1.db.manibus_plēnīs)
+            assertEqual(len(self.char1.db.manibus_vacuīs),0)
+            assertEqual(self.char1.db.toll_fer['ferēns'],self.obj1.db.physical['massa'])
 
 class DīcTestCase(CommandTest):
     """ Test case for 'dīc' (say) """

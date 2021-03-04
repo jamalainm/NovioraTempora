@@ -264,20 +264,24 @@ class Vestīmentum(Rēs):
             quiet (bool): If false, does not message the room
         """
         # See if wearer's hands are full:
-        possessions = wearer.contents
-        hands = ['dextrā','sinistrā']
-        held_items = []
-        full_hands = 0
-        for possession in possessions:
-            if possession.db.tenētur:
-                if possession.db.tenētur in hands:
-                    held_items.append(possession)
-                    full_hands += 1
-                elif possession.db.tenētur == 'ambābus':
-                    held_items.append(possession)
-                    full_hands += 2
-
-        if full_hands >= 2:
+#        possessions = wearer.contents
+#        hands = ['dextrā','sinistrā']
+#        held_items = []
+#        full_hands = 0
+#        for possession in possessions:
+#            if possession.db.tenētur:
+#                if possession.db.tenētur in hands:
+#                    held_items.append(possession)
+#                    full_hands += 1
+#                elif possession.db.tenētur == 'ambābus':
+#                    held_items.append(possession)
+#                    full_hands += 2
+#
+#        if full_hands >= 2:
+#            wearer.msg("Manūs tuae sunt plēnae!")
+#            return
+        # A more elegant check for full hands:
+        if len(wearer.db.manibus_plēnīs) >= 2:
             wearer.msg("Manūs tuae sunt plēnae!")
             return
 

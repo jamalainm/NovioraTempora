@@ -459,8 +459,9 @@ class Da(MuxCommand):
         if latin_target and latin_caller:
             if target.db.geritur:
                 target.remove(caller)
-                caller.msg(f"{target_acc_sg} exuistī.")
-                caller.location.msg_contents(f"{caller.key} {target_acc_sg} exuit.", exclude=caller)
+                # The below messages are currently delivered by remove()
+#                caller.msg(f"{target_acc_sg} exuistī.")
+#                caller.location.msg_contents(f"{caller.key} {target_acc_sg} exuit.", exclude=caller)
 
         # Adjust encumberance and occupied hands for latin participants
         if latin_target and latin_caller:
@@ -538,11 +539,11 @@ class Relinque(MuxCommand):
 
                 # Adding the following to deal with clothing:
         if latin_target and latin_caller:
+            if target.db.geritur:
+                target.remove(caller,quiet=False)
             if target.db.tenētur:
                 # New helper function to manage occupied hands
                 take_out_of_hand(caller,target)
-            if target.db.geritur:
-                target.remove(caller,quiet=True)
 
             # Lighten the callers toll_fer['ferēns']
             target_mass = target.db.physical['massa']
