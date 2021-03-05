@@ -10,62 +10,7 @@ from typeclasses.locī import Locus
 from typeclasses.vestīmenta import Vestīmentum
 
 from commands.iussa import *
-
-class IndueExueTestCase(CommandTest):
-
-    """ Test case for 'indue' (wear) and 'exue' (take off) """
-
-    character_typeclass = Persōna
-    object_typeclass = Vestīmentum
-
-    def setUp(self):
-        super(IndueExueTestCase, self).setUp()
-        # Set up sample character 1
-        self.char1, errors = Persōna.create(
-            "Gaia Iūlia", home=self.room1, location=self.room1.dbref,
-            attributes=[
-                ('formae',{'nom_sg': ['Gaia','Iūlia'],'gen_sg': ['Gaiae','Iūliae']}),
-                ('sexus','muliebre'),
-                ('nōmen','Iūlia'),
-                ('gens','Iūlia'),
-                ('latin',True),
-                ('praenōmen','Gaia'),
-                ])
-
-        self.obj1, errors = Rēs.create(
-                "pallium", home=self.room1, locations=self.char1,
-                attributes=[
-                    ('formae',{'nom_sg': ['pallium'],'gen_sg': ['palliī']}),
-                    ('sexus','neutrum'),
-                    ('latin',True),
-                    ('genusVestīmentōrum','cloak'),
-                    ('physical',{'massa':3}),
-                    ]
-                )
-
-        self.char1.db.toll_fer['ferēns'] = self.obj1.db.physical['massa']
-        self.obj.db.tenēutr = self.char1.db.handedness
-        self.char1.db.manibus_plēnīs.append(self.char1.db.handedness)
-        self.char1.db.manibus_vacuīs.remove(self.char1.db.handedness)
-
-        def test_indue(self):
-
-            # Ensure we get the right message
-            self.call(Indue(), self.obj1.db.formae['acc_sg'],f'|Vīta: {self.char1.db.pv["nunc"]}/{self.char1.db.pv["max"]})') 
-
-            # make sure that held item is out of hands
-            assertFalse(self.obj1.db.tenētur)
-            assertTrue(self.obj1.db.geritur)
-            assertIn(self.char1.db.handedness,self.char1.db.manibus_vacuīs)
-            assertEqual(len(self.char1.db.manibus_plēnīs),0)
-            assertEqual(self.char1.db.toll_fer['ferēns'],self.obj1.db.physical['massa'])
-
-            # make sure that after taking something off it's in hands
-            assertEqual(self.obj1.db.tenētur,self.char1.db.handedness)
-            assertFalse(self.obj1.db.geritur)
-            assertIn(self.char1.db.handedness,self.char1.db.manibus_plēnīs)
-            assertEqual(len(self.char1.db.manibus_vacuīs),0)
-            assertEqual(self.char1.db.toll_fer['ferēns'],self.obj1.db.physical['massa'])
+from commands.vestīre import *
 
 class DīcTestCase(CommandTest):
     """ Test case for 'dīc' (say) """
@@ -337,3 +282,172 @@ class GettingDroppingGivingTestCase(CommandTest):
         self.assertEqual(len(self.char1.db.manibus_plēnīs),1)
         self.assertEqual(len(self.char1.db.manibus_vacuīs),1)
         self.assertIn(off_hand,self.char1.db.manibus_plēnīs)
+
+class IndueExueTestCase(CommandTest):
+    """ Test case for 'indue' (wear) and 'exue' (take off) """
+
+    character_typeclass = Persōna
+    object_typeclass = Vestīmentum
+
+    def setUp(self):
+        super(IndueExueTestCase, self).setUp()
+        # Set up sample character 1
+        self.char1, errors = Persōna.create(
+            "Gaia Iūlia", home=self.room1, location=self.room1.dbref,
+            attributes=[
+                ('formae',{'nom_sg': ['Gaia','Iūlia'],'gen_sg': ['Gaiae','Iūliae']}),
+                ('sexus','muliebre'),
+                ('nōmen','Iūlia'),
+                ('gens','Iūlia'),
+                ('latin',True),
+                ('praenōmen','Gaia'),
+                ])
+
+        # Set up sample character 2
+        self.char2, errors = Persōna.create(
+            "Marcus Appius", home=self.room1, location=self.room1.dbref,
+            attributes=[
+                ('formae',{'nom_sg': ['Marcus','Appius'],'gen_sg': ['Marcī','Appiī']}),
+                ('sexus','māre'),
+                ('nōmen','Appius'),
+                ('gens','Appia'),
+                ('latin',True),
+                ('praenōmen','Marcus'),
+                ])
+
+        self.obj1, errors = Vestīmentum.create(
+                "pallium", home=self.room1,
+                attributes=[
+                    ('formae',{'nom_sg': ['pallium'],'gen_sg': ['palliī']}),
+                    ('sexus','neutrum'),
+                    ('latin',True),
+                    ('genusVestīmentōrum','cloak'),
+                    ('physical',{'massa':3}),
+                    ]
+                )
+
+        self.obj2, errors = Vestīmentum.create(
+                "petasus", home=self.room1,
+                attributes=[
+                    ('formae',{'nom_sg': ['petasus'],'gen_sg': ['petasī']}),
+                    ('sexus','māre'),
+                    ('latin',True),
+                    ('genus_Vestīmentōrum','hat'),
+                    ('physical',{'massa':3}),
+                    ]
+                )
+
+        self.obj3, errors = Vestīmentum.create(
+                "soleae", home=self.room1,
+                attributes=[
+                    ('formae',{'nom_sg': ['soleae'],'gen_sg': ['soleārum']}),
+                    ('sexus','muliebre'),
+                    ('latin',True),
+                    ('genus_Vestīmentōrum','shoes'),
+                    ('physical',{'massa':3}),
+                    ]
+                )
+
+
+    def test_indue(self):
+        """ Put on an article of clothing that is held and take off one worn """
+        # set up objects
+        self.obj1.location = self.char1
+        self.obj1.db.tenētur = self.char1.db.handedness
+        self.char1.db.manibus_plēnīs = [self.char1.db.handedness]
+        self.char1.db.manibus_vacuīs.remove(self.char1.db.handedness)
+        off_hand = self.char1.db.manibus_vacuīs[0]
+    
+
+        self.obj2.location = self.char1
+        self.obj2.db.tenētur = off_hand
+        self.char1.db.manibus_plēnīs.append(off_hand)
+        self.char1.db.manibus_vacuīs = []
+
+        self.obj3.location = self.char1
+        self.obj3.db.geritur = True
+
+        mass_carried = self.obj1.db.physical['massa'] + self.obj2.db.physical['massa'] + self.obj3.db.physical['massa']
+
+        self.char1.db.toll_fer['ferēns'] = mass_carried
+
+        # Ensure we get the right message
+        self.call(Indue(), self.obj1.db.formae['acc_sg'][0],f'{self.obj1.db.formae["acc_sg"][0]} induistī.|Vīta: {self.char1.db.pv["nunc"]}/{self.char1.db.pv["max"]})') 
+
+        # make sure that held item is out of hands
+        self.assertFalse(self.obj1.db.tenētur)
+        self.assertTrue(self.obj1.db.geritur)
+        self.assertIn(self.char1.db.handedness,self.char1.db.manibus_vacuīs)
+        self.assertEqual(len(self.char1.db.manibus_plēnīs),1)
+        self.assertEqual(self.char1.db.toll_fer['ferēns'],mass_carried)
+
+        """ Take off an article of clothing """
+        self.call(Exue(), self.obj1.db.formae['acc_sg'][0],f'{self.obj1.db.formae["acc_sg"][0]} exuistī.|Vīta: {self.char1.db.pv["nunc"]}/{self.char1.db.pv["max"]})') 
+
+        # make sure that after taking something off it's in hands
+        self.assertEqual(self.obj1.db.tenētur,self.char1.db.handedness)
+        self.assertFalse(self.obj1.db.geritur)
+        self.assertIn(self.char1.db.handedness,self.char1.db.manibus_plēnīs)
+        self.assertEqual(len(self.char1.db.manibus_vacuīs),0)
+        self.assertEqual(self.char1.db.toll_fer['ferēns'],mass_carried)
+
+        # Make sure that with full hands you can't take something off
+        self.call(Exue(), self.obj3.db.formae['acc_sg'][0],f'Manūs tuae sunt plēnae!|Vīta: {self.char1.db.pv["nunc"]}/{self.char1.db.pv["max"]})') 
+        self.assertTrue(self.obj3.db.geritur)
+        self.assertEqual(len(self.char1.db.manibus_plēnīs),2)
+        self.assertEqual(len(self.char1.db.manibus_vacuīs),0)
+        self.assertEqual(self.char1.db.toll_fer['ferēns'],mass_carried)
+
+    def test_relinque_exue(self):
+        """ Drop something that is worn """
+        self.obj1.location = self.char1
+        self.obj1.db.tenētur = 'dextrā'
+        self.obj2.location = self.char1
+        self.obj2.db.tenētur = 'sinistrā'
+        self.obj3.location = self.char1
+        self.obj3.db.geritur = True
+
+        self.char1.db.manibus_plēnīs = ['sinistrā','dextrā']
+        self.char1.db.manibus_vacuīs = []
+
+
+        # Can't take off & drop if hands are full
+        self.call(Relinque(), self.obj3.db.formae['acc_sg'][0],
+                f'Manūs tuae sunt plēnae!|Vīta: {self.char1.db.pv["nunc"]}/{self.char1.db.pv["max"]})') 
+
+        # Free up one hand
+        self.char1.db.manibus_vacuīs.append(self.obj1.db.tenētur)
+        self.char1.db.manibus_plēnīs.remove(self.obj1.db.tenētur)
+        self.obj1.db.tenētur = False
+        self.obj1.location = self.room1
+
+        # Drop something worn
+        self.call(Relinque(), self.obj3.db.formae['acc_sg'][0],
+                f'{self.obj3.db.formae["acc_sg"][0]} exuistī.|{self.obj3.db.formae["acc_sg"][0]} relīquistī.|Vīta: {self.char1.db.pv["nunc"]}/{self.char1.db.pv["max"]})') 
+    
+    def test_da_exue(self):
+        """ Give something that is worn """
+        self.obj1.location = self.char1
+        self.obj1.db.tenētur = 'dextrā'
+        self.obj2.location = self.char1
+        self.obj2.db.tenētur = 'sinistrā'
+        self.obj3.location = self.char1
+        self.obj3.db.geritur = True
+
+        self.char1.db.manibus_plēnīs = ['sinistrā','dextrā']
+        self.char1.db.manibus_vacuīs = []
+
+
+        # Can't take off & give if hands are full
+        self.call(Da(), f"{self.obj3.db.formae['acc_sg'][0]} {self.char2.db.formae['dat_sg'][0]}",
+                f'Manūs tuae sunt plēnae!|Vīta: {self.char1.db.pv["nunc"]}/{self.char1.db.pv["max"]})') 
+
+        # Free up one hand
+        self.char1.db.manibus_vacuīs.append(self.obj1.db.tenētur)
+        self.char1.db.manibus_plēnīs.remove(self.obj1.db.tenētur)
+        self.obj1.db.tenētur = False
+        self.obj1.location = self.room1
+
+        # Drop something worn
+        self.call(Da(), f"{self.obj3.db.formae['acc_sg'][0]} {self.char2.db.formae['dat_sg'][0]}",
+                f'{self.obj3.db.formae["acc_sg"][0]} exuistī.|{self.obj3.db.formae["acc_sg"][0]} {self.char2.db.formae["dat_sg"][0]} dedistī.|Vīta: {self.char1.db.pv["nunc"]}/{self.char1.db.pv["max"]})') 

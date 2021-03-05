@@ -12,6 +12,7 @@ from evennia.utils import evtable
 from utils.latin_language.which_one import which_one
 from utils.latin_language.check_grammar import check_case
 from utils.latin_language.free_hands import take_out_of_hand, put_into_hand
+from utils.latin_language.adjective_agreement import us_a_um
 from typeclasses.vestīmenta import CLOTHING_TYPE_LIMIT, CLOTHING_OVERALL_LIMIT, get_worn_clothes, single_type_count
 
 class Indue(MuxCommand):
@@ -537,7 +538,14 @@ class Relinque(MuxCommand):
                 target_direct_object_name = target.key
 
 
-                # Adding the following to deal with clothing:
+        # Adding the following to deal with clothing:
+        # Ensure caller is either holding the target or has a free hand
+        if latin_caller and latin_target:
+            if not target.db.tenētur:
+                if len(caller.db.manibus_plēnīs) >= 2:
+                    caller.msg("Manūs tuae sunt plēnae!")
+                    return
+
         if latin_target and latin_caller:
             if target.db.geritur:
                 target.remove(caller,quiet=False)
@@ -566,7 +574,7 @@ class VestītaPersōnaCmdSet(default_cmds.CharacterCmdSet):
     items.
     """
 
-    key = "DefaultCharacter"
+    key = "Persōna"
 
     def at_cmdset_creation(self):
         """
