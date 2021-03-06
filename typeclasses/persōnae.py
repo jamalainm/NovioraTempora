@@ -10,9 +10,13 @@ creation commands.
 from evennia import DefaultCharacter
 
 # from typeclasses.inflected_noun import InflectedNoun
-# from commands.vestīre import VestītaPersōnaCmdSet
+
 from commands import default_cmdsets
+from typeclasses import vestīmenta
+
 from utils.latin_language.populate_forms import populate_forms
+from utils.latin_language.list_to_string import list_to_string
+from utils.latin_language.adjective_agreement import us_a_um
 
 import random
 
@@ -262,3 +266,73 @@ class Persōna(DefaultCharacter):
                 mapping=location_mapping,
             )
 
+    def at_after_move(self,source_location):
+        super().at_after_move(source_location)
+
+        if self.db.pv:
+            prompt = f"|wVīta: {self.db.pv['nunc']}/{self.db.pv['max']}"
+
+            self.msg(prompt)
+
+    def return_appearance(self, looker, **kwargs):
+            """
+            # Lightly editing to change "You see" to "Ecce"
+            # and 'Exits' to 'Ad hos locos ire potes:'
+            This formats a description. It is the hook a 'look' command
+            should call.
+            Args:
+                looker (Object): Object doing the looking.
+                **kwargs (dict): Arbitrary, optional arguments for users
+                    overriding the call (unused by default).
+            """
+
+
+            if not looker:
+                return ""
+
+            # get description, build string
+            string = "|c%s|n\n" % self.get_display_name(looker)
+            desc = self.db.desc
+
+            # JI (12/7/9) Adding the following lines to accommodate clothing
+            worn_string_list = []
+            clothes_list = vestīmenta.get_worn_clothes(self, exclude_covered=True)
+
+            # Append worn, uncovered clothing to the description
+            for garment in clothes_list:
+
+                # if 'worn' is True, just append the name
+                if garment.db.geritur is True:
+                    if garment.db.ardēns:
+                        worn_string_list.append(f"|yarden{'s' if garment.db.sexus == 'neutrum' else 'tem'}|n {garment.db.acc_sg[0]}")
+
+                    # JI (12/7/19) append the accusative name to the description,
+                    # since these will be direct objects
+                    else:
+                        worn_string_list.append(garment.db.formae['acc_sg'][0])
+                        
+                # Otherwise, append the name and the string value of 'worn'
+                elif garment.db.geritur:
+                    worn_string_list.append("%s %s" % (garment.name, garment.db.geritur))
+
+            # get held clothes
+            possessions = self.contents
+            held_list = []
+            for possession in possessions:
+                if possession.db.tenētur:
+                    if possession.db.ardēns:
+                        held_list.append(f"|y(arden{'s' if possession.db.sexus == 'neutrum' else 'tem'})|n {possession.db.formae['acc_sg'][0]}")
+                    else:
+                        held_list.append(possession.db.formae['acc_sg'][0])
+            if desc:
+                string += f"{self.db.desc}"
+            # Append held items.
+            if held_list:
+                string += "\n\n" + f"tenet: {list_to_string(held_list)}."
+            # Append worn clothes.
+            if worn_string_list:
+                string += "\n\n" + f"gerit: {list_to_string(worn_string_list)}."
+            else:
+#                string += "|/|/%s nūd%s est!" % (self, us_a_um('nom_sg',self.db.sexus))
+                string += "\n\n" + f"{self.key} nūd{us_a_um('nom_sg',self.db.sexus)} est!"
+            return string

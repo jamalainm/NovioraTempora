@@ -15,7 +15,7 @@ own cmdsets by inheriting from them or directly from `evennia.CmdSet`.
 """
 
 from evennia import default_cmds
-from commands.iussa import IussaLatīnaCmdSet
+from commands.iussa import IussaLatīnaCmdSet, IussaAdministrātōrumCmdSet
 from commands.vestīre import VestītaPersōnaCmdSet
 
 
@@ -58,6 +58,7 @@ class PersōnaCmdSet(default_cmds.CharacterCmdSet):
         #
         self.add(IussaLatīnaCmdSet())
         self.add(VestītaPersōnaCmdSet())
+        self.add(IussaAdministrātōrumCmdSet())
 
 
 class AccountCmdSet(default_cmds.AccountCmdSet):

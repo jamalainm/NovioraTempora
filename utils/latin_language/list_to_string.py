@@ -1,11 +1,5 @@
 # file mygame/utils/latin/list_to_string.py
 
-"""
-This is adapted from the utility living in the main evennia directory
-in order to accommodate Latin language things; maybe eventually we
-can get "-que" to work here.
-"""
-
 def list_to_string(inlist, endsep="et", addquote=False):
     """
     This pretty-formats a list as string output, adding an optional
@@ -48,3 +42,4 @@ def list_to_string(inlist, endsep="et", addquote=False):
         if len(inlist) == 1:
             return str(inlist[0])
         return ", ".join(str(v) for v in inlist[:-1]) + "%s %s" % (endsep, inlist[-1])
+

@@ -4,13 +4,248 @@ from evennia.utils.test_resources import LocalEvenniaTest
 from evennia.utils import create
 
 from utils.sample_objs import sample_obj, sample_char, sample_room
+from utils.latin_language.adjective_agreement import us_a_um
+
 from typeclasses.persōnae import Persōna
 from typeclasses.rēs import Rēs
 from typeclasses.locī import Locus
 from typeclasses.vestīmenta import Vestīmentum
+from typeclasses.exitūs import Exitus
 
 from commands.iussa import *
 from commands.vestīre import *
+
+class SpectāTestCase(CommandTest):
+    """ Test case for 'spectā' (behold) """
+
+    character_typeclass = Persōna
+    room_typeclass = Locus
+    object_typeclass = Rēs
+    exit_typeclass = Exitus
+
+    def setUp(self):
+        super(SpectāTestCase, self).setUp()
+        # Set up sample room 1
+        self.room1, errors = Locus.create(key="Ātrium", nohome=True,
+            # adding this for unit testing of Latin
+            attributes=[
+                ('formae', {'nom_sg': ['ātrium'], 'gen_sg': ['ātriī']}),
+                ('sexus', 'neutrum'),
+                ],
+            )
+        self.room1.db.desc = "Hic locus est media domus."
+
+        # Set up sample room 2
+        self.room2, errors = Locus.create(key="Cubiculum", nohome=True,
+            # adding this for unit testing of Latin
+            attributes=[
+                ('formae', {'nom_sg': ['cubiculum'], 'gen_sg': ['cubiculī']}),
+                ('sexus', 'neutrum'),
+                ],
+            )
+        self.room2.db.desc = "Hic locus est ad dormiendum idoneus."
+
+        # Set up sample exit from room 1 to room 2
+        self.exit1, errors = Exitus.create(
+                "in cubiculum",
+                self.room1,
+                self.room2,
+                description="Haec ianua in cubiculum dūcit.",
+                )
+
+        # Set up sample character 1
+        self.char1, errors = Persōna.create(
+            "Gaia Iūlia", home=self.room1, location=self.room1.dbref,
+            attributes=[
+                ('formae',{'nom_sg': ['Gaia','Iūlia'],'gen_sg': ['Gaiae','Iūliae']}),
+                ('sexus','muliebre'),
+                ('nōmen','Iūlia'),
+                ('gens','Iūlia'),
+                ('latin',True),
+                ('praenōmen','Gaia'),
+                ('desc','Fēmina fortis est.'),
+                ])
+
+        # Set up sample character 2
+        self.char2, errors = Persōna.create(
+            "Marcus Appius", home=self.room1, location=self.room1.dbref,
+            attributes=[
+                ('formae',{'nom_sg': ['Marcus','Appius'],'gen_sg': ['Marcī','Appiī']}),
+                ('sexus','māre'),
+                ('nōmen','Appius'),
+                ('gens','Appia'),
+                ('latin',True),
+                ('praenōmen','Marcus'),
+                ('desc','Vir fortis est.'),
+                ])
+
+        # Set up clothes for a character to wear when looked at
+        self.obj1, errors = Vestīmentum.create(
+                "pallium", home=self.room1,
+                attributes=[
+                    ('formae',{'nom_sg': ['pallium'],'gen_sg': ['palliī']}),
+                    ('sexus','neutrum'),
+                    ('latin',True),
+                    ('genusVestīmentōrum','cloak'),
+                    ('physical',{'massa':3}),
+                    ('desc','A dashing cloak'),
+                    ]
+                )
+
+        self.obj2, errors = Vestīmentum.create(
+                "petasus", home=self.room1,
+                attributes=[
+                    ('formae',{'nom_sg': ['petasus'],'gen_sg': ['petasī']}),
+                    ('sexus','māre'),
+                    ('latin',True),
+                    ('genus_Vestīmentōrum','hat'),
+                    ('physical',{'massa':3}),
+                    ('desc','A cunning, wide-brimmed hat'),
+                    ]
+                )
+
+        self.obj3, errors = Vestīmentum.create(
+                "soleae", home=self.room1,
+                attributes=[
+                    ('formae',{'nom_sg': ['soleae'],'gen_sg': ['soleārum']}),
+                    ('sexus','muliebre'),
+                    ('latin',True),
+                    ('genus_Vestīmentōrum','shoes'),
+                    ('physical',{'massa':3}),
+                    ('desc','Simple sandals'),
+                    ]
+                )
+
+        self.obj4, errors = Vestīmentum.create(
+                "petasus", home=self.room1,
+                attributes=[
+                    ('formae',{'nom_sg': ['petasus'],'gen_sg': ['petasī']}),
+                    ('sexus','māre'),
+                    ('latin',True),
+                    ('genus_Vestīmentōrum','hat'),
+                    ('physical',{'massa':3}),
+                    ('desc','A cunning, wide-brimmed hat'),
+                    ]
+                )
+
+
+    def test_spectā_no_target_empty_room(self):
+        self.char1.location = self.room1.dbref
+        self.char2.location = self.room2.dbref
+        self.obj1.location = self.char2
+        self.obj2.location = self.char2
+        self.obj3.location = self.char2
+
+        self.call(Spectā(),'', f"{self.room1.key}" + '\n' + f"{self.room1.db.desc}" + '\n' + "Ad hōs locōs īre licet:" + '\n' + f" {self.exit1.key}|Vīta: {self.char1.db.pv['nunc']}/{self.char1.db.pv['max']}) ")
+
+    def test_spectā_no_target_things_in_room(self):
+        self.char1.location = self.room1.dbref
+        self.char2.location = self.room1.dbref
+        self.obj1.location = self.room1.dbref
+        self.obj2.location = self.room1.dbref
+        self.obj3.location = self.char2
+        self.obj4.location = self.room1.dbref
+
+        self.call(Spectā(),'', f"{self.room1.key}" + '\n' + 
+                f"{self.room1.db.desc}" + '\n' + 
+                "Ad hōs locōs īre licet:" + '\n' + 
+                f" {self.exit1.key}" + '\n' +
+                "Ecce:" + '\n' +
+                f" {self.char2.key}, {self.obj1.db.formae['nom_sg'][0]}" +
+                f" et 2 {self.obj4.db.formae['nom_pl'][0]}"
+                f"|Vīta: {self.char1.db.pv['nunc']}/{self.char1.db.pv['max']}) "
+                )
+
+    def test_spectā_no_target_2_same_thing_in_room(self):
+        self.char1.location = self.room1.dbref
+        self.char2.location = self.room1.dbref
+        self.obj1.location = self.room1.dbref
+        self.obj2.location = self.char2
+        self.obj3.location = self.char2
+
+        self.call(Spectā(),'', f"{self.room1.key}" + '\n' + 
+                f"{self.room1.db.desc}" + '\n' + 
+                "Ad hōs locōs īre licet:" + '\n' + 
+                f" {self.exit1.key}" + '\n' +
+                "Ecce:" + '\n' +
+                f" {self.char2.key} et {self.obj1.db.formae['nom_sg'][0]}" +
+                f"|Vīta: {self.char1.db.pv['nunc']}/{self.char1.db.pv['max']}) "
+                )
+
+    def test_spectā_targeting_object(self):
+        self.char1.location = self.room1.dbref
+        self.obj1.location = self.room1.dbref
+
+        self.call(Spectā(), self.obj1.db.formae['acc_sg'][0], f"{self.obj1.key}" + '\n' +
+                f"{self.obj1.db.desc}" +
+                f"|Vīta: {self.char1.db.pv['nunc']}/{self.char1.db.pv['max']}) "
+                )
+
+    def test_spectā_targeting_naked_character(self):
+        self.char1.location = self.room1.dbref
+        self.char2.location = self.room1.dbref
+
+        # Grammatically masculine target
+        self.call(Spectā(), self.char2.db.formae['acc_sg'][0], f"{self.char2.get_display_name(self.char1)}" + '\n' +
+                f"{self.char2.db.desc}" + '\n' +
+                '\n' +
+                f"{self.char2.key} nūdus est!" +
+                f"|Vīta: {self.char1.db.pv['nunc']}/{self.char1.db.pv['max']}) "
+                )
+
+        # Grammatically masculine target
+        self.call(Spectā(), self.char1.db.formae['acc_sg'][0], f"{self.char1.get_display_name(self.char1)}" + '\n' +
+                f"{self.char1.db.desc}" + '\n' +
+                '\n' +
+                f"{self.char1.key} nūda est!" +
+                f"|Vīta: {self.char1.db.pv['nunc']}/{self.char1.db.pv['max']}) "
+                )
+
+    def test_spectā_targeting_character_holding_something(self):
+        self.char1.location = self.room1.dbref
+        self.char2.location = self.room1.dbref
+        self.obj1.location = self.char2
+        self.obj1.db.tenētur = self.char2.db.handedness
+
+        # Grammatically masculine target
+        self.call(Spectā(), self.char2.db.formae['acc_sg'][0], f"{self.char2.get_display_name(self.char1)}" + '\n' +
+                f"{self.char2.db.desc}" + '\n' +
+                '\n' +
+                f"tenet: pallium.\n\n" 
+                f"{self.char2.key} nūdus est!" +
+                f"|Vīta: {self.char1.db.pv['nunc']}/{self.char1.db.pv['max']}) "
+                )
+
+    def test_spectā_targeting_character_wearing_something(self):
+        self.char1.location = self.room1.dbref
+        self.char2.location = self.room1.dbref
+        self.obj1.location = self.char2
+        self.obj1.db.geritur = True
+
+        # Grammatically masculine target
+        self.call(Spectā(), self.char2.db.formae['acc_sg'][0], f"{self.char2.get_display_name(self.char1)}" + '\n' +
+                f"{self.char2.db.desc}" + '\n' +
+                '\n' +
+                f"gerit: pallium." 
+                f"|Vīta: {self.char1.db.pv['nunc']}/{self.char1.db.pv['max']}) "
+                )
+
+    def test_spectā_targeting_character_wearing_and_holding_something(self):
+        self.char1.location = self.room1.dbref
+        self.char2.location = self.room1.dbref
+        self.obj1.location = self.char2
+        self.obj1.db.geritur = True
+        self.obj2.location = self.char2
+        self.obj2.db.tenētur = self.char2.db.handedness
+
+        # Try looking at someone wearing and holding something
+        self.call(Spectā(), self.char2.db.formae['acc_sg'][0], f"{self.char2.get_display_name(self.char1)}" + '\n' +
+                f"{self.char2.db.desc}" + '\n' +
+                '\n' +
+                f"tenet: petasum.\n\n" +
+                f"gerit: pallium." 
+                f"|Vīta: {self.char1.db.pv['nunc']}/{self.char1.db.pv['max']}) "
+                )
 
 class DīcTestCase(CommandTest):
     """ Test case for 'dīc' (say) """
