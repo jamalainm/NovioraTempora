@@ -336,3 +336,111 @@ class Persōna(DefaultCharacter):
 #                string += "|/|/%s nūd%s est!" % (self, us_a_um('nom_sg',self.db.sexus))
                 string += "\n\n" + f"{self.key} nūd{us_a_um('nom_sg',self.db.sexus)} est!"
             return string
+
+    def announce_move_from(self, destination, msg=None, mapping=None):
+            """
+            Called if the move is to be announced. This is
+            called while we are still standing in the old
+            location.
+            Args:
+                destination (Object): The place we are going to.
+                msg (str, optional): a replacement message.
+                mapping (dict, optional): additional mapping objects.
+            You can override this method and call its parent with a
+            message to simply change the default message.  In the string,
+            you can use the following as mappings (between braces):
+                object: the object which is moving.
+                exit: the exit from which the object is moving (if found).
+                origin: the location of the object before the move.
+                destination: the location of the object after moving.
+            """
+            if not self.location:
+                return
+
+            # changing {origin} to {exit}
+            string = msg or "{object} {exit} discessit." #, heading for {destination}."
+
+            # Get the exit from location to destination
+            location = self.location
+            exits = [
+                o for o in location.contents if o.location is location and o.destination is destination
+            ]
+            mapping = mapping or {}
+            mapping.update({"character": self})
+
+            # No event typeclasses currently in use 3/6/21
+#            if exits:
+#                exits[0].callbacks.call(
+#                    "msg_leave", self, exits[0], location, destination, string, mapping
+#                )
+#                string = exits[0].callbacks.get_variable("message")
+#                mapping = exits[0].callbacks.get_variable("mapping")
+
+            # If there's no string, don't display anything
+            # It can happen if the "message" variable in events is set to None
+            if not string:
+                return
+
+            super().announce_move_from(destination, msg=string, mapping=mapping)
+
+    def announce_move_to(self, source_location, msg=None, mapping=None):
+        """
+        Called after the move if the move was not quiet. At this point
+        we are standing in the new location.
+        Args:
+            source_location (Object): The place we came from
+            msg (str, optional): the replacement message if location.
+            mapping (dict, optional): additional mapping objects.
+        You can override this method and call its parent with a
+        message to simply change the default message.  In the string,
+        you can use the following as mappings (between braces):
+            object: the object which is moving.
+            exit: the exit from which the object is moving (if found).
+            origin: the location of the object before the move.
+            destination: the location of the object after moving.
+        """
+
+        if not source_location and self.location.has_account:
+            # This was created from nowhere and added to an account's
+            # inventory; it's probably the result of a create command.
+            string = "%s nunc tuīs in manibus." % self.get_display_name(self.location)
+            self.location.msg(string)
+            return
+
+        # added the line below because
+        origin = source_location
+        # error checking
+        self.location.msg(source_location)
+        if source_location:
+            origin = source_location.db.formae['abl_sg'][0]
+            string = msg or f"{self.key} ab {source_location.db.formae['abl_sg'][0]} vēnit."
+        else:
+            string = "{character} vēnit."
+
+        # adding '.db.abl_sg' to end of 'source_location' and moving from line below
+        # up into the 'if source_location' conditional
+        destination = self.location
+        exits = []
+        mapping = mapping or {}
+        mapping.update({"character": self})
+
+        if origin:
+            exits = [
+                o
+                for o in destination.contents
+                if o.location is destination and o.destination is origin
+            ]
+            # No event typeclasses currently installed 3/6/21
+#            if exits:
+#                exits[0].callbacks.call(
+#                    "msg_arrive", self, exits[0], origin, destination, string, mapping
+#                )
+#                string = exits[0].callbacks.get_variable("message")
+#                mapping = exits[0].callbacks.get_variable("mapping")
+
+        # If there's no string, don't display anything
+        # It can happen if the "message" variable in events is set to None
+        if not string:
+            return
+
+        super().announce_move_to(source_location, msg=string, mapping=mapping)
