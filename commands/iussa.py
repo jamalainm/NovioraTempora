@@ -676,6 +676,130 @@ class Creātur(MuxCommand):
 
         caller.msg(message)
 
+class Pōne(MuxCommand):
+    """
+    Place one object inside of another in your possession or in your location
+
+    Usage:
+        pōne <rem> in <rem>
+
+    Store things in containers
+    """
+
+    key = "pōne"
+    aliases = ['pone']
+    locks = "cmd:all()"
+    help_category = "Iussa Latīna"
+    auto_help = True
+
+    def func(self):
+        """ run the put command """
+
+        caller = self.caller
+
+        # Ensure proper syntax
+        if len(self.arglist) != 3:
+            caller.msg("Usage: pōne <rem> in <rem>")
+            return
+        elif 'in' not in self.arglist:
+            caller.msg("Usage: pōne <rem> in <rem>")
+            return
+        elif self.arglist[-1] == 'in':
+            caller.msg("Usage: pōne <rem> in <rem>")
+            return
+
+        # Identify target and container
+        if self.arglist[0] == 'in':
+            intended_target = self.arglist[2]
+            intended_container = self.arglist[1]
+        else:
+            intended_target = self.arglist[0]
+            intended_container = self.arglist[2]
+
+        # identify target
+        possessions = caller.contents
+        target, intended_target = which_one(intended_target,caller,possessions)
+        if not target:
+            return
+
+        # check grammar of Latin objects
+        if hasattr(target, 'db'):
+            if target.db.latin:
+                if check_case(caller, target, intended_target, 'acc_sg') == False:
+                    return
+
+        # ensure object is in hands
+        if not target.db.tenētur:
+            caller.msg(f"{target.db.formae['acc_sg'][0]} nōn tenēs!")
+            return
+
+        # identify container
+        stuff = caller.contents + caller.location.contents
+        container, intended_container = which_one(intended_container,caller,stuff)
+        if not container:
+            return
+
+        # check grammar of Latin objects
+        if hasattr(container, 'db'):
+            if container.db.latin:
+                if check_case(caller, container, intended_container, 'acc_sg') == False:
+                    return
+
+        # ensure container *is* a container:
+        if not container.db.capax:
+            caller.msg(f"{container.key} nihil tenēre potest!")
+            return
+
+        # don't let something be put into itself!
+        if target == container:
+            caller.msg(f"{target.name} in sē pōnī nōn potest!")
+            return
+
+        # Manage volume and dimensions of target and container
+        target_volume = target.db.physical['litra']
+        container_max_volume = container.db.capax['max_vol']
+        container_remaining_volume = container.db.capax['rem_vol']
+
+        if target_volume > container_remaining_volume:
+            caller.msg(f"Magnitūdō {target.db.formae['gen_sg'][0]} est māior quam spatium in {container.db.formae['abl_sg'][0]}.")
+            return
+
+        if target.db.physical['rigēns'] == True:
+            target_dimensions = [
+                    target.db.physical['x'],
+                    target.db.physical['y'],
+                    target.db.physical['z'],
+                    ]
+            container_dimensions = [
+                    container.db.capax['x'],
+                    container.db.capax['y'],
+                    container.db.capax['z'],
+                    ]
+            target_dimensions.sort()
+            container_dimensions.sort()
+            # Allow for objects sticking at most half out of container
+            if target_dimensions[2] / 2 > container.db.capax['y'] and target_dimensions[2] > container_dimensions[2]:
+                caller.msg(f"{container.name} satis alt{us_a_um('nom_sg',container.db.sexus)} nōn est!")
+                return
+            elif target_dimensions[1] > container_dimensions[1] or target_dimensions[0] > container_dimensions[0]:
+                caller.msg(f"Forma {target.db.formae['gen_sg'][0]} ad {container.db.formae['acc_sg'][0]} apt{us_a_um('nom_sg',target.db.sexus)} nōn est!")
+                return
+
+        # Make the move happen
+        caller.msg(f"{target.db.formae['acc_sg'][0]} in {container.db.formae['acc_sg'][0]} posuistī.")
+        caller.location.msg_contents(f"{caller.name} {target.db.formae['acc_sg'][0]} in {container.db.formae['acc_sg'][0]} posuit.",exclude=caller)
+        container.db.capax['rem_vol'] -= target.db.physical['litra']
+        take_out_of_hand(caller,target)
+        target.move_to(container, quiet=True)
+
+        # If caller isn't holding the container, fix the encumberance
+        if container not in possessions:
+            caller.db.toll_fer['ferēns'] -= target.db.physical['massa']
+
+        return
+
+
+
 class IussaLatīnaCmdSet(default_cmds.CharacterCmdSet):
     """
     Command set for the Latin commands.
@@ -693,6 +817,7 @@ class IussaLatīnaCmdSet(default_cmds.CharacterCmdSet):
 #        self.add(Da())
         self.add(Dīc())
         self.add(Spectā())
+        self.add(Pōne())
 
 class IussaAdministrātōrumCmdSet(default_cmds.CharacterCmdSet):
     """

@@ -7,9 +7,10 @@ is setup to be the "default" character type created by the default
 creation commands.
 
 """
-from evennia import DefaultCharacter
+# from evennia import DefaultCharacter
+from evennia.contrib.ingame_python.typeclasses import EventCharacter
 
-# from typeclasses.inflected_noun import InflectedNoun
+from evennia.utils.utils import inherits_from
 
 from commands import default_cmdsets
 from typeclasses import vestīmenta
@@ -21,7 +22,7 @@ from utils.latin_language.adjective_agreement import us_a_um
 import random
 
 # class Persōna(DefaultCharacter,InflectedNoun):
-class Persōna(DefaultCharacter):
+class Persōna(EventCharacter):
     """
     The Character defaults to reimplementing some of base Object's hook methods with the
     following functionality:

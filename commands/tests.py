@@ -15,6 +15,239 @@ from typeclasses.exitūs import Exitus
 from commands.iussa import *
 from commands.vestīre import *
 
+class PōneTestCase(CommandTest):
+    """ Test case for 'pōne' (put) """
+
+    character_typeclass = Persōna
+    room_typeclass = Locus
+    object_typeclass = Rēs
+
+    def setUp(self):
+        super(PōneTestCase, self).setUp()
+
+        # Set up sample room 1
+        self.room1, errors = Locus.create(key="Ātrium", nohome=True,
+            # adding this for unit testing of Latin
+            attributes=[
+                ('formae', {'nom_sg': ['ātrium'], 'gen_sg': ['ātriī']}),
+                ('sexus', 'neutrum'),
+                ],
+            )
+        self.room1.db.desc = "Hic locus est media domus."
+
+        # Set up sample character 1
+        self.char1, errors = Persōna.create(
+            "Gaia Iūlia", home=self.room1, location=self.room1.dbref,
+            attributes=[
+                ('formae',{'nom_sg': ['Gaia','Iūlia'],'gen_sg': ['Gaiae','Iūliae']}),
+                ('sexus','muliebre'),
+                ('nōmen','Iūlia'),
+                ('gens','Iūlia'),
+                ('latin',True),
+                ('praenōmen','Gaia'),
+                ('desc','Fēmina fortis est.'),
+                ])
+
+        # Set up sample objects
+        self.obj1 = create.create_object(
+            typeclass=Rēs, key="gladius", location=self.room1.dbref, home=self.room1,
+            # adding this for unit testing of Latin
+            attributes=[
+                ('formae', {'nom_sg': ['gladius'], 'gen_sg': ['gladiī']}),
+                ('sexus', 'māre'),
+                ('latin',True),
+                ('physical',{
+                    'māteria': 'ferrum',
+                    'rigēns': True,
+                    'litra': 0.08,
+                    'x': 0.04,
+                    'y': 0.65,
+                    'z': 0.003,
+                    'massa': 0.6
+                    }
+                    )
+                ]
+            )
+
+        self.obj2 = create.create_object(
+            typeclass=Rēs, key="saccus", location=self.room1.dbref, home=self.room1,
+            # adding this for unit testing of Latin
+            attributes=[
+                ('formae', {'nom_sg': ['saccus'], 'gen_sg': ['saccī']}),
+                ('sexus', 'māre'),
+                ('latin',True),
+                ('physical',{
+                    'māteria': 'linen',
+                    'rigēns': False,
+                    'litra': 0.75,
+                    'massa': 0.45,
+                    }
+                    ),
+                ('capax',{'max_vol':24,'rem_vol':24,"x":0.3,"y":0.4,"z":0.2}),
+                ]
+            )
+
+        self.obj3, errors = Rēs.create(
+            key="lāna", location=self.room1.dbref, home=self.room1,
+            # adding this for unit testing of Latin
+            attributes=[
+                ('formae', {'nom_sg': ['lāna'], 'gen_sg': ['lānae']}),
+                ('latin',True),
+                ('sexus', 'muliebre'),
+                ('physical',{
+                    'māteria': 'lāna',
+                    'rigēns': False,
+                    'litra': 40,
+                    'massa': 3
+                    }
+                    )
+                ]
+            )
+
+        # Set up sample objects
+        self.obj4 = create.create_object(
+            typeclass=Rēs, key="hasta", location=self.room1.dbref, home=self.room1,
+            # adding this for unit testing of Latin
+            attributes=[
+                ('formae', {'nom_sg': ['hasta'], 'gen_sg': ['hastae']}),
+                ('sexus', 'muliebre'),
+                ('latin',True),
+                ('physical',{
+                    'māteria': 'ferrum',
+                    'rigēns': True,
+                    'litra': 0.08,
+                    'x': 0.04,
+                    'y': 2.00,
+                    'z': 0.003,
+                    'massa': 0.6
+                    }
+                    )
+                ]
+            )
+
+        self.obj5 = create.create_object(
+            typeclass=Rēs, key="arca", location=self.room1.dbref, home=self.room1,
+            # adding this for unit testing of Latin
+            attributes=[
+                ('formae', {'nom_sg': ['arca'], 'gen_sg': ['arcae']}),
+                ('sexus', 'muliebre'),
+                ('latin',True),
+                ('physical',{
+                    'māteria': 'lignea',
+                    'rigēns': True,
+                    'litra': 0.75,
+                    'massa': 0.45,
+                    }
+                    ),
+                ('capax',{'max_vol':24,'rem_vol':24,"x":1,"y":0.5,"z":0.5}),
+                ]
+            )
+
+    def test_pōne_target_too_long(self):
+        """ Set char1 up with an object to place in sack """
+        self.char1.db.location = self.room1.dbref
+        self.obj4.location = self.char1
+        self.obj4.db.tenētur = self.char1.db.handedness
+        self.char1.db.manibus_plēnīs.append(self.char1.db.handedness)
+        self.char1.db.manibus_vacuīs.remove(self.char1.db.handedness)
+        char1_off_hand = self.char1.db.manibus_vacuīs[0]
+
+        self.obj2.location = self.char1
+        self.obj2.tenētur = char1_off_hand
+        self.char1.db.manibus_plēnīs.append(char1_off_hand)
+        self.char1.db.manibus_vacuīs.remove(char1_off_hand)
+
+        # Establish encumberence
+        self.char1.db.toll_fer['ferēns'] = self.obj4.db.physical['massa'] + self.obj2.db.physical['massa']
+
+        self.call(Pōne(), 
+                f"{self.obj4.db.formae['acc_sg'][0]} in {self.obj2.db.formae['acc_sg'][0]}", 
+                f"{self.obj2.name} satis altus nōn est!" +
+                f"|Vīta: {self.char1.db.pv['nunc']}/{self.char1.db.pv['max']})")
+
+    def test_pōne_inadquate_space(self):
+        """ Set char1 up with an object to place in sack """
+        self.char1.db.location = self.room1.dbref
+        self.obj3.location = self.char1
+        self.obj3.db.tenētur = self.char1.db.handedness
+        self.char1.db.manibus_plēnīs.append(self.char1.db.handedness)
+        self.char1.db.manibus_vacuīs.remove(self.char1.db.handedness)
+        char1_off_hand = self.char1.db.manibus_vacuīs[0]
+
+        self.obj2.location = self.char1
+        self.obj2.tenētur = char1_off_hand
+        self.char1.db.manibus_plēnīs.append(char1_off_hand)
+        self.char1.db.manibus_vacuīs.remove(char1_off_hand)
+
+        # Establish encumberence
+        self.char1.db.toll_fer['ferēns'] = self.obj3.db.physical['massa'] + self.obj2.db.physical['massa']
+
+        self.call(Pōne(), 
+                f"{self.obj3.db.formae['acc_sg'][0]} in {self.obj2.db.formae['acc_sg'][0]}", 
+                f"Magnitūdō {self.obj3.db.formae['gen_sg'][0]} est māior quam spatium in {self.obj2.db.formae['abl_sg'][0]}." +
+                f"|Vīta: {self.char1.db.pv['nunc']}/{self.char1.db.pv['max']})")
+
+    def test_pōne_fits(self):
+        """ Set char1 up with an object to place in sack """
+        self.char1.db.location = self.room1.dbref
+        self.obj1.location = self.char1
+        self.obj1.db.tenētur = self.char1.db.handedness
+        self.char1.db.manibus_plēnīs.append(self.char1.db.handedness)
+        self.char1.db.manibus_vacuīs.remove(self.char1.db.handedness)
+        char1_off_hand = self.char1.db.manibus_vacuīs[0]
+
+        self.obj2.location = self.char1
+        self.obj2.tenētur = char1_off_hand
+        self.char1.db.manibus_plēnīs.append(char1_off_hand)
+        self.char1.db.manibus_vacuīs.remove(char1_off_hand)
+
+        # Establish encumberence
+        self.char1.db.toll_fer['ferēns'] = self.obj1.db.physical['massa'] + self.obj2.db.physical['massa']
+
+        self.call(Pōne(), 
+                f"{self.obj1.db.formae['acc_sg'][0]} in {self.obj2.db.formae['acc_sg'][0]}", 
+                f"{self.obj1.db.formae['acc_sg'][0]}" +
+                f" in {self.obj2.db.formae['acc_sg'][0]} posuistī." + 
+                f"|Vīta: {self.char1.db.pv['nunc']}/{self.char1.db.pv['max']})")
+
+        # Make sure target location has changed
+        self.assertEqual(self.obj1.location,self.obj2)
+        # Make sure hands are freed up
+        self.assertEqual(self.char1.db.manibus_vacuīs[0],self.char1.db.handedness)
+        self.assertEqual(self.char1.db.manibus_plēnīs[0],char1_off_hand)
+        # Make sure target is no longer held
+        self.assertFalse(self.obj1.db.tenētur)
+
+    def test_pōne_external_container(self):
+        """ Set char1 up with an object to place in sack """
+        self.char1.db.location = self.room1.dbref
+        self.obj1.location = self.char1
+        self.obj1.db.tenētur = self.char1.db.handedness
+        self.char1.db.manibus_plēnīs.append(self.char1.db.handedness)
+        self.char1.db.manibus_vacuīs.remove(self.char1.db.handedness)
+        char1_off_hand = self.char1.db.manibus_vacuīs[0]
+
+        self.obj5.location = self.room1.dbref
+
+        # Establish encumberence
+        self.char1.db.toll_fer['ferēns'] = self.obj1.db.physical['massa']
+
+        self.call(Pōne(), 
+                f"{self.obj1.db.formae['acc_sg'][0]} in {self.obj5.db.formae['acc_sg'][0]}", 
+                f"{self.obj1.db.formae['acc_sg'][0]}" +
+                f" in {self.obj5.db.formae['acc_sg'][0]} posuistī." + 
+                f"|Vīta: {self.char1.db.pv['nunc']}/{self.char1.db.pv['max']})")
+
+        # Make sure target location has changed
+        self.assertEqual(self.obj1.location,self.obj5)
+        # Make sure hands are freed up
+        self.assertEqual(len(self.char1.db.manibus_vacuīs),2)
+        self.assertEqual(len(self.char1.db.manibus_plēnīs),0)
+        # Make sure target is no longer held
+        self.assertFalse(self.obj1.db.tenētur)
+        # Make sure mass of target no part of encumberance
+        self.assertEqual(self.char1.db.toll_fer['ferēns'],0)
+
 class SpectāTestCase(CommandTest):
     """ Test case for 'spectā' (behold) """
 
@@ -25,6 +258,7 @@ class SpectāTestCase(CommandTest):
 
     def setUp(self):
         super(SpectāTestCase, self).setUp()
+
         # Set up sample room 1
         self.room1, errors = Locus.create(key="Ātrium", nohome=True,
             # adding this for unit testing of Latin
@@ -251,6 +485,7 @@ class DīcTestCase(CommandTest):
     """ Test case for 'dīc' (say) """
 
     character_typeclass = Persōna
+    room_typeclass = Locus
 
     def setUp(self):
         super(DīcTestCase, self).setUp()
@@ -280,6 +515,8 @@ class DīcTestCase(CommandTest):
 
     def test_dīc(self):
         """ Set char1 up with an object to drop """
+        # Explicitly puppet a character; dealing with problems after introducing EventChar
+        self.account.puppet_object(self.session, self.char1)
 
         # See if we get success message for a multi-word phrase
         self.call(Dīc(), "Salvēte amīcī, quid agitis?", f'"Salvēte" inquis "amīcī, quid agitis?"|Vīta: {self.char1.db.pv["nunc"]}/{self.char1.db.pv["max"]})')
@@ -523,6 +760,7 @@ class IndueExueTestCase(CommandTest):
 
     character_typeclass = Persōna
     object_typeclass = Vestīmentum
+    room_typeclass = Locus
 
     def setUp(self):
         super(IndueExueTestCase, self).setUp()

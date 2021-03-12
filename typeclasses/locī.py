@@ -6,7 +6,8 @@ Rooms are simple containers that has no location of their own.
 """
 from collections import defaultdict
 
-from evennia import DefaultRoom
+# from evennia import DefaultRoom
+from evennia.contrib.ingame_python.typeclasses import EventRoom
 
 from utils.latin_language.populate_forms import populate_forms
 from utils.latin_language.list_to_string import list_to_string
@@ -16,7 +17,7 @@ from evennia.utils import ansi
 
 # from typeclasses.inflected_noun import InflectedNoun
 
-class Locus(DefaultRoom):
+class Locus(EventRoom):
     """
     Rooms are like any Object, except their location is None
     (which is default). They also use basetype_setup() to

@@ -43,9 +43,8 @@ BAG = {
         "sexus":"māre",
         "desc":"A bag",
         "genus_vestīmentōrum":"back",
-        "can_hold":True,
-        'physical':{"material":"linen","rigid":False,"volume":0.75,"massa":0.45},
-        'container':{'max_vol':24,'rem_vol':24,"x":0.3,"y":0.4,"z":0.2}
+        'physical':{"material":"linen","rigēns":False,"litra":0.75,"massa":0.45},
+        'capax':{'max_vol':24,'rem_vol':24,"x":0.3,"y":0.4,"z":0.2}
         }
 BANDEAU = {
         "key":"strophium",
@@ -54,7 +53,7 @@ BANDEAU = {
         "sexus":"neutrum",
         "desc":"A bandeau",
         "genus_vestīmentōrum":"undershirt",
-        'physical':{"material":"linen","rigid":False,"volume":0.5,'massa':0.45}
+        'physical':{"material":"linen","rigēns":False,"litra":0.5,'massa':0.45}
         }
 
 UNDERWEAR = {
@@ -64,7 +63,7 @@ UNDERWEAR = {
         "sexus":"neutrum",
         "desc":"Briefs",
         "genus_vestīmentōrum":"underpants",
-        'physical':{"material":"linen","rigid":False,"volume":0.5,'massa':0.45}
+        'physical':{"material":"linen","rigēns":False,"litra":0.5,'massa':0.45}
         }
 
 SWORD = {
@@ -73,7 +72,7 @@ SWORD = {
         "formae":{"nom_sg":["gladius"],"gen_sg":["gladiī"]},
         "sexus":"māre",
         "desc":"A shortsword",
-        "physical":{"material":"iron","rigid":True,"x":0.04,"y":0.65,"z":0.003,"massa":0.6,"volume":0.08},
+        "physical":{"material":"iron","rigēns":True,"x":0.04,"y":0.65,"z":0.003,"massa":0.6,"litra":0.08},
         "damage":6
         }
 
@@ -83,7 +82,7 @@ WOOL = {
         "formae":{"nom_sg":["lāna"],"gen_sg":["lānae"]},
         "sexus":"muliebre",
         "desc":"A small bale of wool",
-        'physical':{"material":"wool","rigid":False,"volume":23,"massa":3},
+        'physical':{"material":"wool","rigēns":False,"litra":23,"massa":3},
         }
 CLOAK = {
         "key":"pallium",
@@ -92,7 +91,7 @@ CLOAK = {
         "formae":{"nom_sg":["pallium"],"gen_sg":["palliī"]},
         "sexus":"neutrum",
         "desc":"A simple, well-woven cloth, to wrap about your top",
-        "physical":{"material":"wool","rigid":False,"x":3.04,"y":1.52,"z":0.005,"massa":3,"volume":23}
+        "physical":{"material":"wool","rigēns":False,"x":3.04,"y":1.52,"z":0.005,"massa":3,"litra":23}
         }
 HAT = {
         "key":"petasus",
@@ -101,7 +100,7 @@ HAT = {
         "formae":{"nom_sg":["petasus"],"gen_sg":["petasī"]},
         "sexus":"māre",
         "desc":"A broad-brimmed, traveler's hat",
-        "physical":{"material":"wool","rigid":False,"massa":0.17,"volume":2.21}
+        "physical":{"material":"wool","rigēns":False,"massa":0.17,"litra":2.21}
         }
 
 SANDALS = {
@@ -111,7 +110,7 @@ SANDALS = {
         "formae":{"nom_sg":["soleae"],"gen_sg":["soleārum"]},
         "sexus":"muliebre",
         "desc":"A pair of simple sandals",
-        "physical":{"material":"leather","rigid":True,"x":0.107,"y":0.253,"z":0.0026,"massa":0.48,"volume":0.07}
+        "physical":{"material":"leather","rigēns":True,"x":0.107,"y":0.253,"z":0.0026,"massa":0.48,"litra":0.07}
         }
 
 TUNIC = {
@@ -121,7 +120,7 @@ TUNIC = {
         "formae":{"nom_sg":["tunica"],"gen_sg":["tunicae"]},
         "sexus":"muliebre",
         "desc":"A sleeveless, knee-length tunic",
-        "physical":{"material":"linen","rigid":False,"massa":1,"volume":2}
+        "physical":{"material":"linen","rigēns":False,"massa":1,"litra":2}
         }
 
 LAMP = {
@@ -130,7 +129,7 @@ LAMP = {
         "formae":{"nom_sg":["lūmen"],"gen_sg":["lūminis"]},
         "sexus":"neutrum",
         "desc":"a small, simple, terracotta oil lamp",
-        "physical":{"material":"clay","rigid":True,"massa":0.15,"volume":0.2,'x':0.05,'y':0.05,'z':0.08}
+        "physical":{"material":"clay","rigēns":True,"massa":0.15,"litra":0.2,'x':0.05,'y':0.05,'z':0.08}
         }
 
 VESTAL_HEARTH = {
@@ -140,7 +139,7 @@ VESTAL_HEARTH = {
         "formae":{"nom_sg":["focus"],"gen_sg":["focī"]},
         "sexus":"māre",
         "desc":"A large, marble hearth; it's diameter is nearly 1 |mpassus|n (pace).",
-        "physical":{"material":"marble","rigid":True,"massa":8512,"volume":3140}
+        "physical":{"material":"marble","rigēns":True,"massa":8512,"litra":3140}
         }
 
 PLAIN_HEARTH = {
@@ -149,7 +148,7 @@ PLAIN_HEARTH = {
         "formae":{"nom_sg":["focus"],"gen_sg":["focī"]},
         "sexus":"māre",
         "desc":"A large hearth; it's diameter is nearly 1 |mpassus|n (pace).",
-        "physical":{"material":"stone","rigid":True,"massa":8512,"volume":3140}
+        "physical":{"material":"stone","rigēns":True,"massa":8512,"litra":3140}
         }
 # from random import randint
 #

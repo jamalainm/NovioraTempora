@@ -7,10 +7,11 @@ the following must be specified:
 
 """
 # from typeclasses.inflected_noun import InflectedNoun
-from evennia import DefaultObject
+#from evennia import DefaultObject
+from evennia.contrib.ingame_python.typeclasses import EventObject
 from utils.latin_language.populate_forms import populate_forms
 
-class Rēs(DefaultObject):
+class Rēs(EventObject):
     """
     This is the root typeclass object, implementing an in-game Evennia
     game object, such as having a location, being able to be
