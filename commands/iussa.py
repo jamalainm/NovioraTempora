@@ -847,6 +847,11 @@ class Excipe(MuxCommand):
             if container.db.latin:
                 if check_case(caller, container, intended_container, 'abl_sg') == False:
                     return
+        
+        # Ensure intended container can contain things
+        if not container.db.capax:
+            caller.msg(f"{container.name} nihil continēre potest")
+            return
 
         # identify target
         contents = container.contents
@@ -923,8 +928,62 @@ class Excipe(MuxCommand):
         target.move_to(caller, quiet=True)
         target.at_get(caller)
 
+class Inspice(MuxCommand):
+    """
+    Look inside of a container
 
+    Usage:
+        inspice in <rem>
+    """
+
+    key = "inspice"
+    locks = "cmd:all()"
+    help_category = "Iussae Latīna"
+    auto_help = True
+
+    def func(self):
+        """ handle the looking. """
+
+        caller = self.caller
+
+        if not self.args:
+            caller.msg("Usage: inscpice in <rem>")
+            return
+        elif len(self.arglist) != 2:
+            caller.msg("Usage: inscpice in <rem>")
+            return
+        elif self.arglist[0] != 'in':
+            caller.msg("Usage: inscpice in <rem>")
+            return
+
+        intended_container = self.arglist[1]
+
+        # identify container
+        stuff = caller.contents + caller.location.contents
+        container, intended_container = which_one(intended_container,caller,stuff)
+        if not container:
+            return
+
+        # check grammar of Latin objects
+        if hasattr(container, 'db'):
+            if container.db.latin:
+                if check_case(caller, container, intended_container, 'acc_sg') == False:
+                    return
         
+        # Ensure intended container can contain things
+        if not container.db.capax:
+            caller.msg(f"{container.name} nihil continēre potest!")
+            return
+
+        items = container.contents
+        if not items:
+            string = f"Nihil in {container.db.formae['abl_sg'][0]} est."
+        else:
+            table = self.styled_table(border="header")
+            for item in items:
+                table.add_row("|C%s|n" % item.name, item.db.desc or "")
+            string = "|wEcce:\n%s" % table
+        self.caller.msg(string)
 
 class IussaLatīnaCmdSet(default_cmds.CharacterCmdSet):
     """
@@ -945,6 +1004,7 @@ class IussaLatīnaCmdSet(default_cmds.CharacterCmdSet):
         self.add(Spectā())
         self.add(Pōne())
         self.add(Excipe())
+        self.add(Inspice())
 
 class IussaAdministrātōrumCmdSet(default_cmds.CharacterCmdSet):
     """
