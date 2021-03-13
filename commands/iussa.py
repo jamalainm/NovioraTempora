@@ -999,6 +999,115 @@ class Inspice(MuxCommand):
             string = "|wEcce:\n%s" % table
         self.caller.msg(string)
 
+class Tenē(MuxCommand):
+    """
+    Hold something in a particular hand
+
+    Usage:
+        tenē <rem> <dextrā>/<sinistrā>
+
+    """
+
+    key = "tenē"
+    aliases = ["tene"]
+    locks = "cmd:all()"
+    help_category = "Iussa Latīna"
+    auto_help = True
+
+    def func(self):
+        """ implements the command """
+
+        caller = self.caller
+
+        # Make sure computer syntax is satisfied
+        if not self.args:
+            caller.msg("Quid tenēre velis?")
+            return
+        elif len(self.arglist) != 2:
+            caller.msg("Usage: tenē <rem> <dextrā>/<sinistrā>")
+            return
+
+        hand_specified = False
+        hands = ['dextrā','dextra','sinistrā','sinistra']
+        for arg in self.arglist:
+            if arg in hands:
+                hand_specified = arg
+                break
+
+        if not hand_specified:
+            caller.msg("Quā manū tenēre velis?")
+            return
+
+        # Get the macrons onto the hand:
+        if hand_specified == 'dextra':
+            hand_specified = 'dextrā'
+        elif hand_specified == 'sinistra':
+            hand_specified = 'sinistrā'
+
+        # Identify target
+        self.arglist.remove(hand_specified)
+        intended_target = self.arglist[0]
+
+        stuff = caller.location.contents
+        for con in caller.contents:
+            if con.db.tenētur:
+                stuff.append(con)
+
+        target, intended_target = which_one(intended_target,caller,stuff)
+        if not target:
+            return
+
+        if target.db.latin:
+            if check_case(caller, target, intended_target, 'acc_sg') == False:
+                return
+
+        # If intended hand is full, report to caller
+        if target.db.tenētur == hand_specified:
+            caller.msg(f"{target.db.formae['acc_sg'][0]} illā manū iam tenēs!")
+            return
+        elif hand_specified in caller.db.manibus_plēnīs:
+            caller.msg(f"Illa manus aliquid iam tenet!")
+            return
+
+        # Don't let the caller get non-gettable objects.
+        if not target.access(caller, "get"):
+            if target.db.et_err_msg:
+                caller.msg(target.db.get_err_msg)
+                return
+            else:
+                if latin_target:
+                    caller.msg(f"Tū {target.db.formae['acc_sg'][0]} capere nōn potes.")
+                    return
+                else:
+                    caller.msg(f"Tū {target.key} capere nōn potes.")
+                    return
+
+        # calling at_before_get hook method
+        if not target.at_before_get(caller):
+            return
+
+        # Put into hand
+        if target.db.tenētur:
+            caller.db.manibus_vacuīs.append(target.db.tenētur)
+            caller.db.manibus_vacuīs.remove(hand_specified)
+            caller.db.manibus_plēnīs.remove(target.db.tenētur)
+            caller.db.manibus_plēnīs.append(hand_specified)
+            target.db.tenētur = hand_specified
+        else:
+            if target.db.physical['massa'] + caller.db.toll_fer['ferēns'] > caller.db.toll_fer['max']:
+                caller.msg("Tantum ponderis ferre nōn potes!")
+                return
+            else:
+                target.db.tenētur = hand_specified
+                target.move_to(caller,quiet=True)
+                target.at_get(caller)
+                caller.db.manibus_plēnīs.append(hand_specified)
+                caller.db.manibus_vacuīs.remove(hand_specified)
+                caller.db.toll_fer['ferēns'] += target.db.physical['massa']
+
+        caller.msg(f"{target.db.formae['acc_sg'][0]} {hand_specified} tenēs.")
+        caller.location.msg_contents(f"{caller.name} {target.db.formae['acc_sg'][0]} {hand_specified} tenet.",exclude=caller)
+
 class IussaLatīnaCmdSet(default_cmds.CharacterCmdSet):
     """
     Command set for the Latin commands.
@@ -1019,6 +1128,7 @@ class IussaLatīnaCmdSet(default_cmds.CharacterCmdSet):
         self.add(Pōne())
         self.add(Excipe())
         self.add(Inspice())
+        self.add(Tenē())
 
 class IussaAdministrātōrumCmdSet(default_cmds.CharacterCmdSet):
     """

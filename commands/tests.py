@@ -602,7 +602,7 @@ class DīcTestCase(CommandTest):
         self.call(Dīc(), "Salvēte!", f'"Salvēte!" inquis.|Vīta: {self.char1.db.pv["nunc"]}/{self.char1.db.pv["max"]})')
 
 class GettingDroppingGivingTestCase(CommandTest):
-    """ Test case for 'cape' (get), 'relinque' (drop), 'da' (give). """
+    """ Test case for 'cape' (get), 'relinque' (drop), 'da' (give), 'tenē' (hold). """
 
     character_typeclass = Persōna
     object_typeclass = Rēs
@@ -718,6 +718,81 @@ class GettingDroppingGivingTestCase(CommandTest):
                 ('latin',True),
                 ('praenōmen','Marcus'),
                 ])
+
+    def test_tenē_external(self):
+        self.char1.db.location = self.room1.dbref
+        self.obj1.db.location = self.room1.dbref
+
+        self.call(Tenē(),
+                f"{self.obj1.db.formae['acc_sg'][0]} sinistrā",
+                f"{self.obj1.db.formae['acc_sg'][0]} sinistrā tenēs." +
+                f"|Vīta: {self.char1.db.pv['nunc']}/{self.char1.db.pv['max']})"
+                )
+
+        self.assertEqual(self.char1.db.toll_fer['ferēns'],self.obj1.db.physical['massa'])
+        self.assertEqual(self.obj1.db.tenētur,'sinistrā')
+        self.assertEqual(self.char1.db.manibus_plēnīs,['sinistrā'])
+        self.assertEqual(self.char1.db.manibus_vacuīs,['dextrā'])
+        self.assertEqual(self.obj1.location,self.char1)
+
+    def test_tenē_internal(self):
+        self.char1.db.location = self.room1.dbref
+        self.obj1.db.location = self.char1
+        self.obj1.db.tenētur = 'dextrā'
+        self.char1.db.manibus_plēnīs.append('dextrā')
+        self.char1.db.manibus_vacuīs.remove('dextrā')
+        self.char1.db.toll_fer['ferēns'] = self.obj1.db.physical['massa']
+
+        self.call(Tenē(),
+                f"{self.obj1.db.formae['acc_sg'][0]} sinistrā",
+                f"{self.obj1.db.formae['acc_sg'][0]} sinistrā tenēs." +
+                f"|Vīta: {self.char1.db.pv['nunc']}/{self.char1.db.pv['max']})"
+                )
+
+        self.assertEqual(self.char1.db.toll_fer['ferēns'],self.obj1.db.physical['massa'])
+        self.assertEqual(self.obj1.db.tenētur,'sinistrā')
+        self.assertEqual(self.char1.db.manibus_plēnīs,['sinistrā'])
+        self.assertEqual(self.char1.db.manibus_vacuīs,['dextrā'])
+        self.assertEqual(self.obj1.db.location,self.char1)
+
+    def test_tenē_already_holding(self):
+        self.char1.db.location = self.room1.dbref
+        self.obj1.db.location = self.char1
+        self.obj1.db.tenētur = 'sinistrā'
+        self.char1.db.manibus_plēnīs.append('sinistrā')
+        self.char1.db.manibus_vacuīs.remove('sinistrā')
+        self.char1.db.toll_fer['ferēns'] = self.obj1.db.physical['massa']
+
+        self.call(Tenē(),
+                f"{self.obj1.db.formae['acc_sg'][0]} sinistrā",
+                f"{self.obj1.db.formae['acc_sg'][0]} illā manū iam tenēs!" +
+                f"|Vīta: {self.char1.db.pv['nunc']}/{self.char1.db.pv['max']})"
+                )
+
+        self.assertEqual(self.char1.db.toll_fer['ferēns'],self.obj1.db.physical['massa'])
+        self.assertEqual(self.obj1.db.tenētur,'sinistrā')
+        self.assertEqual(self.char1.db.manibus_plēnīs,['sinistrā'])
+        self.assertEqual(self.char1.db.manibus_vacuīs,['dextrā'])
+
+    def test_tenē_hand_full(self):
+        self.char1.db.location = self.room1.dbref
+        self.obj1.db.location = self.room1.dbref
+        self.obj2.db.location = self.char1
+        self.obj2.db.tenētur = 'sinistrā'
+        self.char1.db.manibus_plēnīs.append('sinistrā')
+        self.char1.db.manibus_vacuīs.remove('sinistrā')
+        self.char1.db.toll_fer['ferēns'] = self.obj2.db.physical['massa']
+
+        self.call(Tenē(),
+                f"{self.obj1.db.formae['acc_sg'][0]} sinistrā",
+                f"Illa manus aliquid iam tenet!" +
+                f"|Vīta: {self.char1.db.pv['nunc']}/{self.char1.db.pv['max']})"
+                )
+
+        self.assertEqual(self.char1.db.toll_fer['ferēns'],self.obj2.db.physical['massa'])
+        self.assertFalse(self.obj1.db.tenētur)
+        self.assertEqual(self.char1.db.manibus_plēnīs,['sinistrā'])
+        self.assertEqual(self.char1.db.manibus_vacuīs,['dextrā'])
 
     def test_relinque(self):
         """ Set char1 up with an object to drop """
