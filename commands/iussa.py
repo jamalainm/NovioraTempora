@@ -798,7 +798,133 @@ class Pōne(MuxCommand):
 
         return
 
+class Excipe(MuxCommand):
+    """
+    Take something out of something else
 
+    Usage:
+        excipe <rem> ē/ex <rē>
+
+    """
+
+    key = "excipe"
+    locks = "cmd:all()"
+    help_category = "Iussa Latīna"
+    auto_help = True
+
+    def func(self):
+        """ run the put command """
+
+        caller = self.caller
+
+        # Ensure proper syntax
+        if len(self.arglist) != 3:
+            caller.msg("Usage: excipe <rem> ē/ex <rē>")
+            return
+        elif 'ē' not in self.arglist and 'e' not in self.arglist and 'ex' not in self.arglist:
+            caller.msg("Usage: excipe <rem> ē/ex <rē>")
+            return
+        elif self.arglist[-1] == 'e' or self.arglist[-1] == 'ē' or self.arglist[-1] == 'ex':
+            caller.msg("Usage: excipe <rem> ē/ex <rē>")
+            return
+
+        # Identify target and container
+        if self.arglist[0] == 'ex' or self.arglist[0] == 'e' or self.arglist[0] == 'ē':
+            intended_target = self.arglist[2]
+            intended_container = self.arglist[1]
+        else:
+            intended_target = self.arglist[0]
+            intended_container = self.arglist[2]
+
+        # identify container
+        stuff = caller.contents + caller.location.contents
+        container, intended_container = which_one(intended_container,caller,stuff)
+        if not container:
+            return
+
+        # check grammar of Latin objects
+        if hasattr(container, 'db'):
+            if container.db.latin:
+                if check_case(caller, container, intended_container, 'abl_sg') == False:
+                    return
+
+        # identify target
+        contents = container.contents
+        target, intended_target = which_one(intended_target,caller,contents)
+        if not target:
+            return
+
+        # check grammar of Latin objects
+        if hasattr(target, 'db'):
+            if target.db.latin:
+                if check_case(caller, target, intended_target, 'acc_sg') == False:
+                    return
+
+        # Don't let the caller get non-gettable objects.
+        if not target.access(caller, "get"):
+            if target.db.et_err_msg:
+                caller.msg(target.db.get_err_msg)
+                return
+            else:
+                if target.db.latin:
+                    caller.msg(f"Tū {target.db.formae['acc_sg'][0]} capere nōn potes.")
+                    return
+                else:
+                    caller.msg(f"Tū {target.key} capere nōn potes.")
+                    return
+
+        # calling at_before_get hook method
+        if not target.at_before_get(caller):
+            return
+        latin_caller = False
+        latin_target = False
+
+        if caller.db.latin:
+            latin_caller = True
+        if target.db.latin:
+            latin_target = True
+
+        # If the object and the caller are Latin objects, follow through with
+        # evaluating caller's ability to carry anything else
+        if latin_caller and latin_target:
+            current_carry = caller.db.toll_fer['ferēns']
+            carry_max = caller.db.toll_fer['max']
+            target_mass = target.db.physical['massa']
+
+            # Check to see if character can carry any more weight;
+            # Add target mass to burden if caller can carry more
+            if current_carry + target_mass > carry_max:
+                caller.msg("Tantum ponderis ferre nōn potes!")
+                return
+
+            # Check to see if hands are free;
+            # If so, put into dominant hand, if free
+            if len(caller.db.manibus_plēnīs) >= 2:
+                caller.msg("Manūs tuae sunt plēnae!")
+                return
+
+            put_into_hand(caller, target)
+            if container.location != caller:
+                caller.db.toll_fer['ferēns'] += target_mass
+
+            caller.msg(f"{target.db.formae['acc_sg'][0]} ex {container.db.formae['abl_sg'][0]} cēpistī.")
+            caller.location.msg_contents(
+                    f"{caller.key} {target.db.formae['acc_sg'][0]} ex {container.db.formae['abl_sg'][0]} cēpit.",
+                    exclude=caller
+                    )
+        else:
+            caller.msg(f"{target.key} ex {container.key} cēpistī.")
+            caller.location.msg_contents(
+                    f"{caller.key} {target.key} ex {container.key} cēpit.",
+                    exclude=caller
+                    )
+
+        # move target to inventory if possible
+        target.move_to(caller, quiet=True)
+        target.at_get(caller)
+
+
+        
 
 class IussaLatīnaCmdSet(default_cmds.CharacterCmdSet):
     """
@@ -818,6 +944,7 @@ class IussaLatīnaCmdSet(default_cmds.CharacterCmdSet):
         self.add(Dīc())
         self.add(Spectā())
         self.add(Pōne())
+        self.add(Excipe())
 
 class IussaAdministrātōrumCmdSet(default_cmds.CharacterCmdSet):
     """

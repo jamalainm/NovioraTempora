@@ -15,7 +15,7 @@ from typeclasses.exitūs import Exitus
 from commands.iussa import *
 from commands.vestīre import *
 
-class PōneTestCase(CommandTest):
+class PōneExcipeTestCase(CommandTest):
     """ Test case for 'pōne' (put) """
 
     character_typeclass = Persōna
@@ -23,7 +23,7 @@ class PōneTestCase(CommandTest):
     object_typeclass = Rēs
 
     def setUp(self):
-        super(PōneTestCase, self).setUp()
+        super(PōneExcipeTestCase, self).setUp()
 
         # Set up sample room 1
         self.room1, errors = Locus.create(key="Ātrium", nohome=True,
@@ -142,6 +142,47 @@ class PōneTestCase(CommandTest):
                 ('capax',{'max_vol':24,'rem_vol':24,"x":1,"y":0.5,"z":0.5}),
                 ]
             )
+
+    def test_excipe_external(self):
+        """ Set up external container with object for char1 to get """
+        self.char1.db.location = self.room1.dbref
+        self.obj5.location = self.room1.dbref
+        self.obj1.location = self.obj5
+
+        self.call(Excipe(),
+                f"{self.obj1.db.formae['acc_sg'][0]} ex {self.obj5.db.formae['abl_sg'][0]}",
+                f"{self.obj1.db.formae['acc_sg'][0]} ex" +
+                f" {self.obj5.db.formae['abl_sg'][0]}" +
+                f" cēpistī." +
+                f"|Vīta: {self.char1.db.pv['nunc']}/{self.char1.db.pv['max']})"
+                )
+
+        self.assertEqual(self.char1.db.toll_fer['ferēns'],self.obj1.db.physical['massa'])
+        self.assertEqual(self.char1.db.manibus_plēnīs[0],self.char1.db.handedness)
+
+    def test_excipe_held_container(self):
+        """ Set up held container with object for char1 to get """
+        self.char1.db.location = self.room1.dbref
+        self.obj2.location = self.char1
+        self.obj1.location = self.obj2
+        self.obj2.db.tenētur = self.char1.db.handedness
+        self.char1.db.manibus_plēnīs.append(self.char1.db.handedness)
+        self.char1.db.manibus_vacuīs.remove(self.char1.db.handedness)
+        self.char1.db.toll_fer['ferēns'] = self.obj1.db.physical['massa'] + self.obj2.db.physical['massa']
+
+        self.call(Excipe(),
+                f"{self.obj1.db.formae['acc_sg'][0]} ex {self.obj2.db.formae['abl_sg'][0]}",
+                f"{self.obj1.db.formae['acc_sg'][0]} ex" +
+                f" {self.obj2.db.formae['abl_sg'][0]}" +
+                f" cēpistī." +
+                f"|Vīta: {self.char1.db.pv['nunc']}/{self.char1.db.pv['max']})"
+                )
+
+        self.assertEqual(self.char1.db.toll_fer['ferēns'],self.obj1.db.physical['massa'] + self.obj2.db.physical['massa'])
+        self.assertEqual(len(self.char1.db.manibus_plēnīs),2)
+        self.assertEqual(len(self.char1.db.manibus_vacuīs),0)
+        self.assertEqual(self.obj1.location,self.char1)
+        self.assertTrue(self.obj1.db.tenētur)
 
     def test_pōne_target_too_long(self):
         """ Set char1 up with an object to place in sack """
