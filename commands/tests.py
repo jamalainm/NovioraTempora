@@ -15,15 +15,15 @@ from typeclasses.exitūs import Exitus
 from commands.iussa import *
 from commands.vestīre import *
 
-class PōneExcipeTestCase(CommandTest):
-    """ Test case for 'pōne' (put) """
+class ContainerTestCase(CommandTest):
+    """ Test cases for 'pōne' (put), 'excipe' (take out), 'inspice' (look in) """
 
     character_typeclass = Persōna
     room_typeclass = Locus
     object_typeclass = Rēs
 
     def setUp(self):
-        super(PōneExcipeTestCase, self).setUp()
+        super(ContainerTestCase, self).setUp()
 
         # Set up sample room 1
         self.room1, errors = Locus.create(key="Ātrium", nohome=True,
@@ -63,7 +63,7 @@ class PōneExcipeTestCase(CommandTest):
                     'x': 0.04,
                     'y': 0.65,
                     'z': 0.003,
-                    'massa': 0.6
+                    'massa': 1
                     }
                     )
                 ]
@@ -80,7 +80,7 @@ class PōneExcipeTestCase(CommandTest):
                     'māteria': 'linen',
                     'rigēns': False,
                     'litra': 0.75,
-                    'massa': 0.45,
+                    'massa': 2,
                     }
                     ),
                 ('capax',{'max_vol':24,'rem_vol':24,"x":0.3,"y":0.4,"z":0.2}),
@@ -100,7 +100,8 @@ class PōneExcipeTestCase(CommandTest):
                     'litra': 40,
                     'massa': 3
                     }
-                    )
+                    ),
+                ('desc','Some wool'),
                 ]
             )
 
@@ -119,7 +120,7 @@ class PōneExcipeTestCase(CommandTest):
                     'x': 0.04,
                     'y': 2.00,
                     'z': 0.003,
-                    'massa': 0.6
+                    'massa': 4
                     }
                     )
                 ]
@@ -136,7 +137,7 @@ class PōneExcipeTestCase(CommandTest):
                     'māteria': 'lignea',
                     'rigēns': True,
                     'litra': 0.75,
-                    'massa': 0.45,
+                    'massa': 5,
                     }
                     ),
                 ('capax',{'max_vol':24,'rem_vol':24,"x":1,"y":0.5,"z":0.5}),
@@ -148,6 +149,7 @@ class PōneExcipeTestCase(CommandTest):
         self.char1.db.location = self.room1.dbref
         self.obj5.location = self.room1.dbref
         self.obj1.location = self.obj5
+        self.obj5.db.physical['massa'] += self.obj1.db.physical['massa']
 
         self.call(Excipe(),
                 f"{self.obj1.db.formae['acc_sg'][0]} ex {self.obj5.db.formae['abl_sg'][0]}",
@@ -159,6 +161,7 @@ class PōneExcipeTestCase(CommandTest):
 
         self.assertEqual(self.char1.db.toll_fer['ferēns'],self.obj1.db.physical['massa'])
         self.assertEqual(self.char1.db.manibus_plēnīs[0],self.char1.db.handedness)
+        self.assertEqual(self.obj5.db.physical['massa'],5)
 
     def test_excipe_held_container(self):
         """ Set up held container with object for char1 to get """
@@ -168,7 +171,9 @@ class PōneExcipeTestCase(CommandTest):
         self.obj2.db.tenētur = self.char1.db.handedness
         self.char1.db.manibus_plēnīs.append(self.char1.db.handedness)
         self.char1.db.manibus_vacuīs.remove(self.char1.db.handedness)
-        self.char1.db.toll_fer['ferēns'] = self.obj1.db.physical['massa'] + self.obj2.db.physical['massa']
+
+        self.obj2.db.physical['massa'] += self.obj1.db.physical['massa']
+        self.char1.db.toll_fer['ferēns'] = self.obj2.db.physical['massa']
 
         self.call(Excipe(),
                 f"{self.obj1.db.formae['acc_sg'][0]} ex {self.obj2.db.formae['abl_sg'][0]}",
@@ -183,6 +188,34 @@ class PōneExcipeTestCase(CommandTest):
         self.assertEqual(len(self.char1.db.manibus_vacuīs),0)
         self.assertEqual(self.obj1.location,self.char1)
         self.assertTrue(self.obj1.db.tenētur)
+
+    def test_inspice_smtg_in_container_no_desc(self):
+        """ Set up external container with object for char1 to get """
+        self.char1.db.location = self.room1.dbref
+        self.obj5.location = self.room1.dbref
+        self.obj1.location = self.obj5
+
+        self.call(Inspice(),
+                f"in {self.obj5.db.formae['acc_sg'][0]}",
+                f"Ecce:\n" +
+                f" {self.obj1.name}" +
+                f"   {self.obj1.db.desc or ''}" +
+                f"|Vīta: {self.char1.db.pv['nunc']}/{self.char1.db.pv['max']})"
+                )
+
+    def test_inspice_smtg_in_container_desc(self):
+        """ Set up external container with object for char1 to get """
+        self.char1.db.location = self.room1.dbref
+        self.obj5.location = self.room1.dbref
+        self.obj3.location = self.obj5
+
+        self.call(Inspice(),
+                f"in {self.obj5.db.formae['acc_sg'][0]}",
+                f"Ecce:\n" +
+                f" {self.obj3.name}" +
+                f"  {self.obj3.db.desc or ''} " +
+                f"|Vīta: {self.char1.db.pv['nunc']}/{self.char1.db.pv['max']})"
+                )
 
     def test_pōne_target_too_long(self):
         """ Set char1 up with an object to place in sack """
@@ -258,6 +291,8 @@ class PōneExcipeTestCase(CommandTest):
         self.assertEqual(self.char1.db.manibus_plēnīs[0],char1_off_hand)
         # Make sure target is no longer held
         self.assertFalse(self.obj1.db.tenētur)
+        self.assertEqual(self.obj2.db.physical['massa'],3)
+        self.assertEqual(self.obj2.db.physical['litra'],0.83)
 
     def test_pōne_external_container(self):
         """ Set char1 up with an object to place in sack """
@@ -288,6 +323,7 @@ class PōneExcipeTestCase(CommandTest):
         self.assertFalse(self.obj1.db.tenētur)
         # Make sure mass of target no part of encumberance
         self.assertEqual(self.char1.db.toll_fer['ferēns'],0)
+        self.assertEqual(self.obj5.db.physical['massa'],6)
 
 class SpectāTestCase(CommandTest):
     """ Test case for 'spectā' (behold) """

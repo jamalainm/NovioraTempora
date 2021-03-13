@@ -792,9 +792,16 @@ class Pōne(MuxCommand):
         take_out_of_hand(caller,target)
         target.move_to(container, quiet=True)
 
+        # If container isn't rigid, increase its volume
+        if not container.db.physical['rigēns']:
+            container.db.physical['litra'] += target.db.physical['litra']
+
         # If caller isn't holding the container, fix the encumberance
         if container not in possessions:
             caller.db.toll_fer['ferēns'] -= target.db.physical['massa']
+
+        # adjust the mass of the container
+        container.db.physical['massa'] += target.db.physical['massa']
 
         return
 
@@ -927,6 +934,13 @@ class Excipe(MuxCommand):
         # move target to inventory if possible
         target.move_to(caller, quiet=True)
         target.at_get(caller)
+
+        # If non-rigid container, reduce its volume
+        if container.db.physical['rigēns']:
+            container.db.physical['litra'] -= target.db.physical['litra']
+
+        # Remove the mass of the target from the mass of the container
+        container.db.physical['massa'] -= target.db.physical['massa']
 
 class Inspice(MuxCommand):
     """
