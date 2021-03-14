@@ -73,7 +73,7 @@ SWORD = {
         "sexus":"māre",
         "desc":"A shortsword",
         "physical":{"material":"iron","rigēns":True,"x":0.04,"y":0.65,"z":0.003,"massa":0.6,"litra":0.08},
-        "damage":6
+        "vīs":6
         }
 
 WOOL = {

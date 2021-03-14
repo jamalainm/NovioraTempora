@@ -952,7 +952,7 @@ class Inspice(MuxCommand):
 
     key = "inspice"
     locks = "cmd:all()"
-    help_category = "Iussae Latīna"
+    help_category = "Iussa Latīna"
     auto_help = True
 
     def func(self):

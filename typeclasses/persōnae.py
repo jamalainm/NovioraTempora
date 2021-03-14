@@ -9,6 +9,7 @@ creation commands.
 """
 # from evennia import DefaultCharacter
 from evennia.contrib.ingame_python.typeclasses import EventCharacter
+from world.tb_basic import TBBasicCharacter
 
 from evennia.utils.utils import inherits_from
 
@@ -22,7 +23,7 @@ from utils.latin_language.adjective_agreement import us_a_um
 import random
 
 # class Persōna(DefaultCharacter,InflectedNoun):
-class Persōna(EventCharacter):
+class Persōna(EventCharacter,TBBasicCharacter):
     """
     The Character defaults to reimplementing some of base Object's hook methods with the
     following functionality:

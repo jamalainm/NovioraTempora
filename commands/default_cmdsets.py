@@ -20,6 +20,7 @@ from evennia.contrib.ingame_python.commands import CmdCallback
 
 from commands.iussa import IussaLatīnaCmdSet, IussaAdministrātōrumCmdSet
 from commands.vestīre import VestītaPersōnaCmdSet
+from world.tb_basic import BattleCmdSet
 
 
 class CharacterCmdSet(default_cmds.CharacterCmdSet):
@@ -62,6 +63,10 @@ class PersōnaCmdSet(default_cmds.CharacterCmdSet):
         self.add(IussaLatīnaCmdSet())
         self.add(VestītaPersōnaCmdSet())
         self.add(IussaAdministrātōrumCmdSet())
+        #
+        # For combat
+        #
+        self.add(BattleCmdSet())
         #
         # For ingame_python
         #
