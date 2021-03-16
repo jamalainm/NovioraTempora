@@ -205,7 +205,7 @@ class DeclineNoun:
         forms = []
 
         for i in endings:
-            forms.append(base + 1)
+            forms.append(base + i)
 
         return forms
 

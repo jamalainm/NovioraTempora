@@ -72,9 +72,9 @@ class Spectā(MuxCommand):
                 return
 
         # Maybe too many arguments?
-        elif  len(self.arglist) != 1:
-            caller.msg("Quid spectāre velis?")
-            return
+#        elif  len(self.arglist) != 1:
+#            caller.msg("Quid spectāre velis?")
+#            return
 
         # looking at a thing
         else:
@@ -85,7 +85,9 @@ class Spectā(MuxCommand):
 
             # check grammar of Latin objects
             if hasattr(target, 'db'):
-                if target.db.latin:
+                if target.db.destination:
+                    pass
+                elif target.db.latin:
                     if check_case(caller, target, self.args, 'acc_sg') == False:
                         return
 
@@ -597,7 +599,7 @@ class Mūniātur(ObjManipCommand):
                     )
             alias_string = ""
             if new_exit_to_there.aliases.all():
-                alias_string = " (%s)" % ", ".join(new_exit_to_there.aleases.all())
+                alias_string = " (%s)" % ", ".join(new_exit_to_there.aliases.all())
             exit_to_there_string = f"\nCreated exit from {location.name} to {new_room.name}: {exit_to_there}({new_exit_to_there.dbref}) {alias_string}"
             caller.msg(exit_to_there_string)
 

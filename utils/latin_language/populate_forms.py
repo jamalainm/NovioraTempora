@@ -1,6 +1,7 @@
 # file mygame/utils/latin_language/populate_forms.py
 
 from utils.latin_language.decline_noun import DeclineNoun
+from unidecode import unidecode
 
 def populate_forms(self,nom,gen,gender):
     """
@@ -19,3 +20,4 @@ def populate_forms(self,nom,gen,gender):
 
     for form in forms.values():
         self.aliases.add(form)
+        self.aliases.add(unidecode(form))

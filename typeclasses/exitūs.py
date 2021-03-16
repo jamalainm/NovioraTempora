@@ -9,6 +9,8 @@ for allowing Characters to traverse the exit to its destination.
 # from evennia import DefaultExit
 from evennia.contrib.ingame_python.typeclasses import EventExit
 
+from unidecode import unidecode
+
 
 class Exitus(EventExit):
     """
@@ -36,4 +38,5 @@ class Exitus(EventExit):
                                         defined, in which case that will simply be echoed.
     """
 
-    pass
+    def basetype_posthook_setup(self):
+        self.aliases.add(unidecode(self.name))
