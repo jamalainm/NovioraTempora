@@ -40,3 +40,4 @@ class Exitus(EventExit):
 
     def basetype_posthook_setup(self):
         self.aliases.add(unidecode(self.name))
+        self.db.desc = self.destination
