@@ -163,7 +163,6 @@ def get_damage(attacker, defender):
         if thing.db.tenētur:
             if thing.db.tenētur == attacker.db.handedness:
                 if thing.db.vīs:
-                    attacker.msg(f"Your weapon has the following power: {thing.db.vīs}")
                     weapon = thing
 #                attacker.location.msg_contents(f"|gWEAPON|n")
     bonus = calc_bonus(attacker.db.ingenia['vīrēs'])

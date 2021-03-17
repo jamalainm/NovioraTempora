@@ -37,6 +37,7 @@ BASE_CHARACTER_TYPECLASS = "typeclasses.persōnae.Persōna"
 BASE_OBJECT_TYPECLASS = "typeclasses.rēs.Rēs"
 BASE_ROOM_TYPECLASS = "typeclasses.locī.Locus"
 BASE_EXIT_TYPECLASS = "typeclasses.exitūs.Exitus"
+DEFAULT_HOME = '#56'
 
 MULTISESSION_MODE = 2
 

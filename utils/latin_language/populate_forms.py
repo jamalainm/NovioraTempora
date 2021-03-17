@@ -3,12 +3,12 @@
 from utils.latin_language.decline_noun import DeclineNoun
 from unidecode import unidecode
 
-def populate_forms(self,nom,gen,gender):
+def populate_forms(self,nom='cīvis',gen='cīvis',gender='muliebre'):
     """
     A helper function for at_object_creation() for Latin typeclasses
     """
 
-    word = DeclineNoun(nom,gen,gender)
+    word = DeclineNoun(nom=nom,gen=gen,gender=gender)
     forms = word.make_paradigm()
 
     for key, value in forms.items():

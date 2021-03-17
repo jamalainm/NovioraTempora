@@ -5,20 +5,27 @@ Iussa
 Iussa describe the Latin commands and syntax for interacting with the world
 
 """
+from django.conf import settings
 
 from evennia.commands.default import muxcommand
 from evennia.utils import create
 from evennia import default_cmds
+from evennia.objects.models import ObjectDB
 
 from evennia.commands.default.building import ObjManipCommand
+
+from unidecode import unidecode
+from random import choice, randint
 
 from utils.latin_language.adjective_agreement import us_a_um
 from utils.latin_language.which_one import which_one
 from utils.latin_language.check_grammar import check_case
 from utils.latin_language.free_hands import free_hands, put_into_hand, take_out_of_hand
+from utils.latin_language.gens_class_praenomina import name_data
 
 from typeclasses.locī import Locus
 from typeclasses.exitūs import Exitus
+# from typeclasses.persōnae import Persōna
 
 class MuxCommand(muxcommand.MuxCommand):
     """
@@ -678,6 +685,120 @@ class Creātur(MuxCommand):
 
         caller.msg(message)
 
+class Nascātur(MuxCommand):
+    """
+    Create an NPC
+
+    Usage:
+        nascātur <praenomen>, [<nomen>], <sexus> = <genitive praenomen>, <genitive nomen>
+
+    """
+
+    key = "nascātur"
+    aliases = ["nascatur"]
+    locks = "cmd:perm(Builder)"
+    help_category = "Iussa Administrātōrum"
+    auto_help = True
+
+    def func(self):
+        """
+        The command for creating an NPC itself
+        """
+
+        caller = self.caller
+
+        self.nōmen = None
+        self.nōmen_gen = None
+        self.gens = None
+
+        sexus = {'māre': 'masculine', 'muliebre': 'feminine'}
+
+        if not self.args:
+            self.sexus = choice(list(sexus.keys()))
+            self.gender = sexus[self.sexus]
+            self.gens = choice(list(name_data.keys()))
+            self.praenōmen = choice(name_data[self.gens]['praenomina'][self.gender])
+            if self.sexus == 'muliebre':
+                self.nōmen = self.gens
+            elif self.sexus == 'māre':
+                self.nōmen = self.gens[:-1] + 'us'
+            else:
+                self.nōmen = self.gens[:-1] + 'um'
+
+            if self.sexus == 'muliebre':
+                self.praenōmen_gen = self.praenōmen + 'e'
+                self.nōmen_gen = self.nōmen + 'e'
+            else:
+                self.nōmen_gen = self.nōmen[:-2] + 'ī'
+                if self.praenōmen == 'Opiter':
+                    self.praenōmen_gen = 'Opitris'
+                elif self.praenōmen == 'Caesō':
+                    self.praenōmen_gen = 'Caesōnis'
+                elif self.praenōmen == 'Sertor':
+                    self.praenōmen_gen = 'Sertōris'
+                else:
+                    self.praenōmen_gen = self.praenōmen[:-2] + 'ī'
+            nōmina = self.praenōmen + ' ' + self.nōmen
+
+        elif not self.rhslist:
+            caller.msg("Usage: nascātur [<praenōmen>, [<nōmen>], <sexus> = <praenōminis>, [<nōminis>]]")
+        elif self.lhslist[-1] not in ['māre', 'muliebre', 'neutrum']:
+            caller.msg("Usage: nascātur [<praenōmen>, [<nōmen>], <sexus> = <praenōminis>, [<nōminis>]]")
+        elif len(self.lhslist) > 2 and len(self.rhslist) == 2:
+            self.praenōmen = self.lhslist[0]
+            self.praenōmen_gen = self.rhslist[0]
+            self.nōmen = self.lhslist[1]
+            self.nōmen_gen = self.rhslist[1]
+            self.sexus = self.lhslist[2]
+            if self.sexus == 'muliebre':
+                self.gens = self.nōmen
+            else:
+                self.gens = self.nōmen[:-2] + 'a'
+        else:
+            self.praenōmen = self.lhslist[0]
+            self.praenōmen_gen = self.rhslist[0]
+            self.sexus = self.lhslist[1]
+
+        if self.nōmen:
+            nōmina = self.praenōmen + ' ' + self.nōmen
+        else:
+            nōmina = self.praenōmen
+#        home = 56
+        home = ObjectDB.objects.get_id(settings.DEFAULT_HOME)
+        typeclass = 'typeclasses.persōnae.Persōna'
+
+        nom_sg = [self.praenōmen]
+        gen_sg = [self.praenōmen_gen]
+
+        if self.nōmen:
+            nom_sg.append(self.nōmen)
+            gen_sg.append(self.nōmen_gen)
+
+        char = create.create_object(
+                typeclass = typeclass,
+                key = nōmina,
+                home = home,
+                location = caller.location,
+                attributes = [
+                    ('lang', 'latin'),
+                    ('sexus', self.sexus),
+                    ('gens', self.gens),
+                    ('praenōmen', self.praenōmen),
+                    ('nōmen', self.nōmen),
+                    ('formae',{
+                        'nom_sg': nom_sg,
+                        'gen_sg': gen_sg,
+#                        'nom_sg': [self.praenōmen,self.nōmen],
+#                        'gen_sg': [self.praenōmen_gen,self.nōmen_gen],
+                        }
+                        )
+                    ]
+                )
+
+        caller.location.msg_contents(f"{nōmina} nāt{us_a_um('nom_sg',self.sexus)} est!")
+
+
+
 class Pōne(MuxCommand):
     """
     Place one object inside of another in your possession or in your location
@@ -1047,8 +1168,13 @@ class Tenē(MuxCommand):
             hand_specified = 'sinistrā'
 
         # Identify target
-        self.arglist.remove(hand_specified)
-        intended_target = self.arglist[0]
+#        self.arglist.remove(hand_specified)
+        intended_target = None
+        for sa in self.arglist:
+            if unidecode(sa) != unidecode(hand_specified):
+                intended_target = sa
+#        no_hands = arguments.remove(hand_specified)
+#        intended_target = no_hands[0]
 
         stuff = caller.location.contents
         for con in caller.contents:
@@ -1146,3 +1272,4 @@ class IussaAdministrātōrumCmdSet(default_cmds.CharacterCmdSet):
         super().at_cmdset_creation()
         self.add(Creātur())
         self.add(Mūniātur())
+        self.add(Nascātur())

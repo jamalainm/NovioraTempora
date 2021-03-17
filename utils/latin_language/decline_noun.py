@@ -11,7 +11,7 @@ class DeclineNoun:
     for a typeclass.
     """
     
-    def __init__(self,nom,gen,gender,irregular=False):
+    def __init__(self,nom='cīvis',gen='cīvis',gender='muliebre',irregular=False):
         self.nom = nom
         self.gen = gen
         self.gender = gender

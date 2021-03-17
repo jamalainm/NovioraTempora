@@ -61,12 +61,12 @@ class Persōna(EventCharacter,TBBasicCharacter):
                 genitive = self.db.formae['gen_sg'][0]
                 sexus = self.db.sexus
 
-                populate_forms(self, nominative, genitive, sexus)
+                populate_forms(self, nom=nominative, gen=genitive, gender=sexus)
 
                 # Check if there is a nōmen for this character
                 if len(self.db.formae['nom_sg']) > 1:
 
-                    populate_forms(self, nōmen_nom, nōmen_gen, sexus)
+                    populate_forms(self, nom=nōmen_nom, gen=nōmen_gen, gender=sexus)
 
                 self.db.Latin = True
 
