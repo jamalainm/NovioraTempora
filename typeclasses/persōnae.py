@@ -268,6 +268,28 @@ class Persōna(EventCharacter,TBBasicCharacter):
                 mapping=location_mapping,
             )
 
+            # Needed for 'say' events
+        location = getattr(self, "location", None)
+        location = (
+            location
+            if location and inherits_from(location, "evennia.objects.objects.DefaultRoom")
+            else None
+        )
+
+        if location and not kwargs.get("whisper", False):
+            location.callbacks.call("say", self, location, message, parameters=message)
+
+            # Call the other characters' "say" event
+            presents = [
+                obj
+                for obj in location.contents
+                if obj is not self
+                and inherits_from(obj, "evennia.objects.objects.DefaultCharacter")
+            ]
+            for present in presents:
+                present.callbacks.call("say", self, present, message, parameters=message)
+
+
     def at_after_move(self,source_location):
         super().at_after_move(source_location)
 
