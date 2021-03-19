@@ -482,7 +482,6 @@ class Errāns(Persōna):
         self.scripts.add(ErrāreScript)
 
     def goto_next_room(self):
-        self.location.msg_contents("About to decide whether to move.")
         if hasattr(self,'db.hometown'):
             hometown = self.db.hometown
             
