@@ -8,6 +8,8 @@ creation commands.
 
 """
 # from evennia import DefaultCharacter
+import evennia
+
 from evennia.contrib.ingame_python.typeclasses import EventCharacter
 from world.tb_basic import TBBasicCharacter
 
@@ -15,6 +17,7 @@ from evennia.utils.utils import inherits_from
 
 from commands import default_cmdsets
 from typeclasses import vestīmenta
+from typeclasses.errāre_script import ErrāreScript
 
 from utils.latin_language.populate_forms import populate_forms
 from utils.latin_language.list_to_string import list_to_string
@@ -387,7 +390,7 @@ class Persōna(EventCharacter,TBBasicCharacter):
             # Get the exit from location to destination
             location = self.location
             exits = [
-                o for o in location.contents if o.location is location and o.destination is destination
+                o for o in location.contents if o.location is location and o.destination
             ]
             mapping = mapping or {}
             mapping.update({"character": self})
@@ -468,3 +471,40 @@ class Persōna(EventCharacter,TBBasicCharacter):
             return
 
         super().announce_move_to(source_location, msg=string, mapping=mapping)
+
+class Errāns(Persōna):
+    """
+    This is an NPC that will move randomly every minute or so.
+    """
+
+    def at_object_creation(self):
+        self.cmdset.add_default(default_cmdsets.PersōnaCmdSet, permanent=True)
+        self.scripts.add(ErrāreScript)
+
+    def goto_next_room(self):
+        self.location.msg_contents("About to decide whether to move.")
+        if hasattr(self,'db.hometown'):
+            hometown = self.db.hometown
+            
+        location = self.location
+        exits = [
+                o for o in location.contents if o.location is location and o.destination
+                ]
+        options = len(exits) + 1
+        direction = random.randint(1,options)
+        if direction <= len(exits):
+            new_room = random.choice(exits)
+            hometown = ''
+            if hasattr(self.db,'hometown'):
+                hometown = self.db.hometown
+                possible_rooms = evennia.search_tag(hometown, category="zone")
+
+                can_go = False
+                for pr in possible_rooms:
+                    if new_room.destination.dbref == pr.dbref:
+                        can_go = True
+                if not can_go:
+                    return
+        
+            self.move_to(new_room)
+
