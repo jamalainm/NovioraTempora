@@ -1345,7 +1345,7 @@ class Ligā(MuxCommand):
                 exclude=(caller,target)
                 )
 
-        target.db.descriptive_name = f"{target.name} {ligature_abl} ligāt{us_a_um('nom_sg',target.db.sexus)} qu{'em' if ligature_sexus == 'māre' else 'am' if ligature_sexus == 'muliebre' else 'od'} tenet {caller_nom}." 
+        target.db.descriptive_name = f"{target.name} {ligature_abl} ligāt{us_a_um('nom_sg',target.db.sexus)} qu{'em' if ligature_sexus == 'māre' else 'am' if ligature_sexus == 'muliebre' else 'od'} tenet {caller_nom}" 
 
 class Solve(MuxCommand):
     """

@@ -314,9 +314,10 @@ class Persōna(EventCharacter,TBBasicCharacter):
         if self.db.ligāta:
             ligature = Ligātūra.objects.get(id=self.db.ligāta[1:])
             leash_location = ligature.location
-            if leash_location.typename != 'Locus' and leash_location.location == self.location:
-                self.msg(f"Ligāt{us_a_um('nom_sg',self.db.sexus)}, proficīscī nōn potes!")
-                return False
+            if leash_location.typename != 'Locus':
+                if leash_location.location == self.location and leash_location != self:
+                    self.msg(f"Ligāt{us_a_um('nom_sg',self.db.sexus)}, proficīscī nōn potes!")
+                    return False
         
         origin = self.location
         Room = DefaultRoom
@@ -355,8 +356,20 @@ class Persōna(EventCharacter,TBBasicCharacter):
                 ligature = p
 
         if ligature:
-            bound_entity = Persōna.objects.get(id=ligature.db.ligāns[1:])
-            bound_entity.move_to(self.location)
+            if ligature.db.ligāns:
+                bound_entity = Persōna.objects.get(id=ligature.db.ligāns[1:])
+                if bound_entity != self:
+                    bound_entity.move_to(self.location)
+
+        if self.db.ligāta:
+            loose_ligature = None
+            stuff = source_location.contents
+            for s in stuff:
+                if s.dbref == self.db.ligāta:
+                    loose_ligature = s
+
+            if loose_ligature:
+                loose_ligature.move_to(self.location)
 
         if self.db.pv:
             prompt = f"|wVīta: {self.db.pv['nunc']}/{self.db.pv['max']}"

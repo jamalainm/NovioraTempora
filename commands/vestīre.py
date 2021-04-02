@@ -15,6 +15,8 @@ from utils.latin_language.free_hands import take_out_of_hand, put_into_hand
 from utils.latin_language.adjective_agreement import us_a_um
 from typeclasses.vestīmenta import CLOTHING_TYPE_LIMIT, CLOTHING_OVERALL_LIMIT, get_worn_clothes, single_type_count
 
+from evennia.utils.search import search_object
+
 class Indue(MuxCommand):
     """
     Puts on an item of clothing you are holding.
@@ -482,6 +484,16 @@ class Da(MuxCommand):
                 exclude=(caller,recipient)
                 )
         
+        # Account for objects that are binding other objects
+        if target.typename == 'Ligātūra' and target.db.ligāns:
+            bound_character = None
+            possessions = caller.contents
+            everything = caller.location.contents + possessions
+            for e in everything:
+                if e.dbref == target.db.ligāns:
+                    bound_character = e
+        bound_character.db.descriptive_name = f"{bound_character.name} {target.db.formae['abl_sg'][0]} ligāt{us_a_um('nom_sg',bound_character.db.sexus)}"
+
         target.at_give(caller, recipient)
 
 class Relinque(MuxCommand):
@@ -564,6 +576,17 @@ class Relinque(MuxCommand):
         target.move_to(caller.location, quiet=True)
         caller.msg(f"{target_direct_object_name} relīquistī.")
         caller.location.msg_contents(f"{caller.name} {target_direct_object_name} relīquit.", exclude=caller)
+
+
+        # Account for objects that are binding other objects
+        if target.typename == 'Ligātūra' and target.db.ligāns:
+            bound_character = None
+            possessions = caller.contents
+            everything = caller.location.contents + possessions
+            for e in everything:
+                if e.dbref == target.db.ligāns:
+                    bound_character = e
+            bound_character.db.descriptive_name = f"{bound_character.name} {target.db.formae['abl_sg'][0]} ligāt{us_a_um('nom_sg',bound_character.db.sexus)}"
 
         # call the object script's at_drop() method.
         target.at_drop(caller)
