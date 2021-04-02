@@ -373,9 +373,11 @@ class Da(MuxCommand):
 
         entity_1, arg1 = which_one(self.arglist[0], caller, everything)
         if not entity_1:
+            caller.msg(f"'{arg1}' nōn invēnistī!")
             return
         entity_2, arg2 = which_one(self.arglist[1], caller, everything)
         if not entity_2:
+            caller.msg(f"'{arg2}' nōn invēnistī!")
             return
 
         # Ensure that one of the entities is in possessions and one is in room
@@ -520,6 +522,7 @@ class Relinque(MuxCommand):
         stuff = caller.contents
         target, self.args = which_one(self.args, caller, stuff)
         if not target:
+            caller.msg(f"'{self.args}' nōn invēnistī!")
             return
 
         # Call the object's scripts at_before_drop() method

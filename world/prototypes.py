@@ -46,6 +46,15 @@ BAG = {
         'physical':{"material":"linen","rigēns":False,"litra":0.75,"massa":0.45},
         'capax':{'max_vol':24,'rem_vol':24,"x":0.3,"y":0.4,"z":0.2}
         }
+LEASH = {
+        "key":"lōrum",
+        "typeclass":"typeclasses.rēs.Ligātūra",
+        "formae":{"nom_sg":["lōrum"],"gen_sg":["lōrī"]},
+        "sexus":"neutrum",
+        "desc":"A leash",
+        'physical':{"material":"leather","rigēns":False,"litra":0.5,'massa':0.45}
+        }
+
 BANDEAU = {
         "key":"strophium",
         "typeclass":"typeclasses.vestīmenta.Vestīmentum",

@@ -14,12 +14,13 @@ own cmdsets by inheriting from them or directly from `evennia.CmdSet`.
 
 """
 
-from evennia import default_cmds
+from evennia import default_cmds, CmdSet
 
 from evennia.contrib.ingame_python.commands import CmdCallback
 
 from commands.iussa import IussaLatīnaCmdSet, IussaAdministrātōrumCmdSet
 from commands.vestīre import VestītaPersōnaCmdSet
+# from commands.iussa_rērum import Ligā
 from world.tb_basic import BattleCmdSet
 
 
@@ -131,3 +132,11 @@ class SessionCmdSet(default_cmds.SessionCmdSet):
         #
         # any commands you add below will overload the default ones.
         #
+
+# class LigātūraCmdSet(CmdSet):
+#     """
+#     This cmdset is used with things that can bind other things
+#     """
+#     key = "Ligāre"
+#     def at_cmdset_creation(self):
+#         self.add(Ligā())

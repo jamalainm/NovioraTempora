@@ -41,3 +41,21 @@ class Exitus(EventExit):
     def basetype_posthook_setup(self):
         self.aliases.add(unidecode(self.name))
         self.db.desc = self.destination
+
+    def at_failed_traverse(self, traversing_object, **kwargs):
+        """
+        Overloads the default hook to implement a simple default error message.
+
+        Args:
+            traversing_object (Object): The object that failed traversing us.
+            **kwargs (dict): Arbitrary, optional arguments for users
+                overriding the call (unused by default).
+
+        Notes:
+            Using the default exits, this hook will not be called if an
+            Attribute `err_traverse` is defined - this will in that case be
+            read for an error string instead.
+
+        """
+        traversing_object.msg("Illūc īre nōn licet.")
+

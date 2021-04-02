@@ -7,7 +7,7 @@ from utils.sample_objs import sample_obj, sample_char, sample_room
 from utils.latin_language.adjective_agreement import us_a_um
 
 from typeclasses.persōnae import Persōna
-from typeclasses.rēs import Rēs
+from typeclasses.rēs import Rēs, Ligātūra
 from typeclasses.locī import Locus
 from typeclasses.vestīmenta import Vestīmentum
 from typeclasses.exitūs import Exitus
@@ -1076,3 +1076,117 @@ class IndueExueTestCase(CommandTest):
         # Drop something worn
         self.call(Da(), f"{self.obj3.db.formae['acc_sg'][0]} {self.char2.db.formae['dat_sg'][0]}",
                 f'{self.obj3.db.formae["acc_sg"][0]} exuistī.|{self.obj3.db.formae["acc_sg"][0]} {self.char2.db.formae["dat_sg"][0]} dedistī.|Vīta: {self.char1.db.pv["nunc"]}/{self.char1.db.pv["max"]})') 
+
+class LigāTestCase(CommandTest):
+    """ Test case for 'liga' (bind) """
+
+    character_typeclass = Persōna
+    room_typeclass = Locus
+    object_typeclass = Ligātūra
+    exit_typeclass = Exitus
+
+    def setUp(self):
+        super(LigāTestCase, self).setUp()
+
+        # Set up sample room 1
+        self.room1, errors = Locus.create(key="Ātrium", nohome=True,
+            # adding this for unit testing of Latin
+            attributes=[
+                ('formae', {'nom_sg': ['ātrium'], 'gen_sg': ['ātriī']}),
+                ('sexus', 'neutrum'),
+                ],
+            )
+        self.room1.db.desc = "Hic locus est media domus."
+
+        # Set up sample room 2
+        self.room2, errors = Locus.create(key="Cubiculum", nohome=True,
+            # adding this for unit testing of Latin
+            attributes=[
+                ('formae', {'nom_sg': ['cubiculum'], 'gen_sg': ['cubiculī']}),
+                ('sexus', 'neutrum'),
+                ],
+            )
+        self.room2.db.desc = "Hic locus est ad dormiendum idoneus."
+
+        # Set up sample exit from room 1 to room 2
+        self.exit1, errors = Exitus.create(
+                "in cubiculum",
+                self.room1,
+                self.room2,
+                description="Haec ianua in cubiculum dūcit.",
+                )
+
+        # Set up sample character 1
+        self.char1, errors = Persōna.create(
+            "Gaia Iūlia", home=self.room1, location=self.room1.dbref,
+            attributes=[
+                ('formae',{'nom_sg': ['Gaia','Iūlia'],'gen_sg': ['Gaiae','Iūliae']}),
+                ('sexus','muliebre'),
+                ('nōmen','Iūlia'),
+                ('gens','Iūlia'),
+                ('latin',True),
+                ('praenōmen','Gaia'),
+                ('desc','Fēmina fortis est.'),
+                ])
+
+        # Set up sample character 2
+        self.char2, errors = Persōna.create(
+            "Marcus Appius", home=self.room1, location=self.room1.dbref,
+            attributes=[
+                ('formae',{'nom_sg': ['Marcus','Appius'],'gen_sg': ['Marcī','Appiī']}),
+                ('sexus','māre'),
+                ('nōmen','Appius'),
+                ('gens','Appia'),
+                ('latin',True),
+                ('praenōmen','Marcus'),
+                ('desc','Vir fortis est.'),
+                ])
+
+        # Set up a thong to be used as a leash
+        self.obj1, errors = Ligātūra.create(
+                "lōrum", home=self.room1,
+                attributes=[
+                    ('formae',{'nom_sg': ['lōrum'],'gen_sg': ['lōrī']}),
+                    ('sexus','neutrum'),
+                    ('latin',True),
+                    ('physical',{'massa':3}),
+                    ('desc','A leather leash'),
+                    ]
+                )
+    def test_ligā_not_held(self):
+        """ Set characters in same place as lōrum """
+        self.char1.db.location = self.room1.dbref
+        self.char2.db.location = self.room1.dbref
+        self.obj1.location = self.room1.dbref
+
+        # Try to use the lorum without holding it
+        self.call(Ligā(),
+                f"{self.obj1.db.formae['abl_sg'][0]} {self.char2.db.formae['acc_sg'][0]}",
+                f"Nūllum tenēs quō ligāre potes." +
+                f"|Vīta: {self.char1.db.pv['nunc']}/{self.char1.db.pv['max']})"
+                )
+
+    def test_ligā_held(self):
+        """ Set characters in same place as lōrum """
+        self.char1.db.location = self.room1.dbref
+        self.char2.db.location = self.room1.dbref
+        self.obj1.location = self.char1
+        self.obj1.db.tenētur = True
+
+        self.char1.db.manibus_vacuīs.remove(self.char1.db.handedness)
+        self.char1.db.manibus_plēnīs.append(self.char1.db.handedness)
+        
+
+        # Try to use the lorum without holding it
+        self.call(Ligā(),
+                f"{self.obj1.db.formae['abl_sg'][0]} {self.char2.db.formae['acc_sg'][0]}",
+                f"{self.char2.db.formae['acc_sg'][0]} {self.obj1.db.formae['abl_sg'][0]} ligāvistī." +
+                f"|Vīta: {self.char1.db.pv['nunc']}/{self.char1.db.pv['max']})"
+                )
+
+        self.call(Solve(),
+                f"{self.obj1.db.formae['abl_sg'][0]} {self.char2.db.formae['acc_sg'][0]}",
+                f"{self.char2.db.formae['acc_sg'][0]} {self.obj1.db.formae['abl_sg'][0]} solvistī." +
+                f"|Vīta: {self.char1.db.pv['nunc']}/{self.char1.db.pv['max']})"
+                )
+

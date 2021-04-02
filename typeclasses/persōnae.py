@@ -11,6 +11,7 @@ creation commands.
 import evennia
 
 from evennia.contrib.ingame_python.typeclasses import EventCharacter
+from evennia import DefaultRoom, DefaultCharacter
 from world.tb_basic import TBBasicCharacter
 
 from evennia.utils.utils import inherits_from
@@ -18,6 +19,7 @@ from evennia.utils.utils import inherits_from
 from commands import default_cmdsets
 from typeclasses import vestīmenta
 from typeclasses.errāre_script import ErrāreScript
+from typeclasses.rēs import Ligātūra
 
 from utils.latin_language.populate_forms import populate_forms
 from utils.latin_language.list_to_string import list_to_string
@@ -293,8 +295,68 @@ class Persōna(EventCharacter,TBBasicCharacter):
                 present.callbacks.call("say", self, present, message, parameters=message)
 
 
+    def at_before_move(self, destination):
+        """
+        Called just before starting to move this object to
+        destination.
+
+        Args:
+            destination (Object): The object we are moving to
+
+        Returns:
+            shouldmove (bool): If we should move or not.
+
+        Notes:
+            If this method returns False/None, the move is cancelled
+            before it is even started.
+
+        """
+        if self.db.ligāta:
+            ligature = Ligātūra.objects.get(id=self.db.ligāta[1:])
+            leash_location = ligature.location
+            if leash_location.typename != 'Locus' and leash_location.location == self.location:
+                self.msg(f"Ligāt{us_a_um('nom_sg',self.db.sexus)}, proficīscī nōn potes!")
+                return False
+        
+        origin = self.location
+        Room = DefaultRoom
+        if isinstance(origin, Room) and isinstance(destination, Room):
+            can = self.callbacks.call("can_move", self, origin, destination)
+            if can:
+                can = origin.callbacks.call("can_move", self, origin)
+                if can:
+                    # Call other character's 'can_part' event
+                    for present in [
+                        o
+                        for o in origin.contents
+                        if isinstance(o, DefaultCharacter) and o is not self
+                    ]:
+                        can = present.callbacks.call("can_part", present, self)
+                        if not can:
+                            break
+
+            if can is None:
+                return True
+
+            return can
+
+        return True
+
     def at_after_move(self,source_location):
         super().at_after_move(source_location)
+
+        # Bring bound characters with you on move
+        possessions = self.contents
+
+        ligature = False
+        # Make sure that caller is holding a ligature
+        for p in possessions:
+            if p.db.tenētur and p.typename == 'Ligātūra':
+                ligature = p
+
+        if ligature:
+            bound_entity = Persōna.objects.get(id=ligature.db.ligāns[1:])
+            bound_entity.move_to(self.location)
 
         if self.db.pv:
             prompt = f"|wVīta: {self.db.pv['nunc']}/{self.db.pv['max']}"
@@ -507,3 +569,27 @@ class Errāns(Persōna):
         
             self.move_to(new_room)
 
+    def get_display_name(self, looker, **kwargs):
+        """
+        Displays the name of the object in a viewer-aware manner.
+
+        Args:
+            looker (TypedObject): The object or account that is looking
+                at/getting inforamtion for this object.
+
+        Returns:
+            name (str): A string containing the name of the object,
+                including the DBREF if this user is privileged to control
+                said object.
+
+        Notes:
+            This function could be extended to change how object names
+            appear to users in character, but be wary. This function
+            does not change an object's keys or aliases when
+            searching, and is expected to produce something useful for
+            builders.
+
+        """
+        if self.locks.check_lockstring(looker, "perm(Builder)"):
+            return "{}(#{})".format(self.name, self.id)
+        return self.name

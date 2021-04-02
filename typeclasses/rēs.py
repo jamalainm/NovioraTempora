@@ -11,6 +11,11 @@ the following must be specified:
 from evennia.contrib.ingame_python.typeclasses import EventObject
 from utils.latin_language.populate_forms import populate_forms
 
+from evennia.contrib.ingame_python.utils import register_events
+
+# from commands.iussa_rērum import LigātūraCmdSet
+# from commands.default_cmdsets import LigātūraCmdSet
+
 class Rēs(EventObject):
     """
     This is the root typeclass object, implementing an in-game Evennia
@@ -191,3 +196,25 @@ class Rēs(EventObject):
 #            if getter.db.toll_fer and self.db.physical:
 #                getter.db.toll_fer['ferēns'] += mass
 #
+
+# EVENT_LIGĀ = """
+#     A character holding the leash (lōrum) can tie the leash to certain
+#     other objects. A tied character can't go when the leash is held
+#     and must follow when someone holding the leash exits.
+# 
+#     variables you can use in this event:
+#         character: the character holding the leash
+#         target: the character to which the leash is tied
+#         ligature: the thing that can connect
+# """
+
+class Ligātūra(Rēs):
+
+#    _events = {
+#            "ligā": (['character','target','ligature'],EVENT_LIGĀ),
+#            }
+
+    pass
+
+#     def at_object_creation(self):
+#         self.cmdset.add(LigātūraCmdSet(), permanent=True)

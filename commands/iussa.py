@@ -25,6 +25,7 @@ from utils.latin_language.gens_class_praenomina import name_data
 
 from typeclasses.locī import Locus
 from typeclasses.exitūs import Exitus
+from typeclasses.rēs import Ligātūra
 # from typeclasses.persōnae import Persōna
 
 class MuxCommand(muxcommand.MuxCommand):
@@ -88,6 +89,7 @@ class Spectā(MuxCommand):
             stuff = caller.location.contents + caller.contents
             target, self.args = which_one(self.args, caller, stuff)
             if not target:
+                caller.msg(f"'{self.args}' nōn invēnistī!")
                 return
 
             # check grammar of Latin objects
@@ -140,6 +142,7 @@ class Cape(MuxCommand):
         # Return the target and the args
         target, self.args = which_one(self.args, caller, stuff)
         if not target:
+            caller.msg(f"'{self.args}' nōn invēnistī!")
             return
 
         # Check if target is Latin-language object
@@ -249,6 +252,7 @@ class Relinque(MuxCommand):
         stuff = caller.contents
         target, self.args = which_one(self.args, caller, stuff)
         if not target:
+            caller.msg(f"'{self.args}' nōn invēnistī!")
             return
 
         # Call the object's scripts at_before_drop() method
@@ -344,9 +348,11 @@ class Da(MuxCommand):
 
         entity_1, arg1 = which_one(self.arglist[0], caller, everything)
         if not entity_1:
+            caller.msg(f"'{arg1}' nōn invēnistī!")
             return
         entity_2, arg2 = which_one(self.arglist[1], caller, everything)
         if not entity_2:
+            caller.msg(f"'{arg2}' nōn invēnistī!")
             return
 
         # Ensure that one of the entities is in possessions and one is in room
@@ -843,6 +849,7 @@ class Pōne(MuxCommand):
         possessions = caller.contents
         target, intended_target = which_one(intended_target,caller,possessions)
         if not target:
+            caller.msg(f"'{intended_target}' nōn invēnistī!")
             return
 
         # check grammar of Latin objects
@@ -860,6 +867,7 @@ class Pōne(MuxCommand):
         stuff = caller.contents + caller.location.contents
         container, intended_container = which_one(intended_container,caller,stuff)
         if not container:
+            caller.msg(f"'{intended_container}' nōn invēnistī!")
             return
 
         # check grammar of Latin objects
@@ -970,6 +978,7 @@ class Excipe(MuxCommand):
         stuff = caller.contents + caller.location.contents
         container, intended_container = which_one(intended_container,caller,stuff)
         if not container:
+            caller.msg(f"'{intended_container}' nōn invēnistī!")
             return
 
         # check grammar of Latin objects
@@ -987,6 +996,7 @@ class Excipe(MuxCommand):
         contents = container.contents
         target, intended_target = which_one(intended_target,caller,contents)
         if not target:
+            caller.msg(f"'{intended_target}' nōn invēnistī!")
             return
 
         # check grammar of Latin objects
@@ -1099,6 +1109,7 @@ class Inspice(MuxCommand):
         stuff = caller.contents + caller.location.contents
         container, intended_container = which_one(intended_container,caller,stuff)
         if not container:
+            caller.msg(f"'{intended_container}' nōn invēnistī!")
             return
 
         # check grammar of Latin objects
@@ -1183,6 +1194,7 @@ class Tenē(MuxCommand):
 
         target, intended_target = which_one(intended_target,caller,stuff)
         if not target:
+            caller.msg(f"'{intended_container}' nōn invēnistī!")
             return
 
         if target.db.latin:
@@ -1236,6 +1248,189 @@ class Tenē(MuxCommand):
         caller.msg(f"{target.db.formae['acc_sg'][0]} {hand_specified} tenēs.")
         caller.location.msg_contents(f"{caller.name} {target.db.formae['acc_sg'][0]} {hand_specified} tenet.",exclude=caller)
 
+class Ligā(MuxCommand):
+    """
+    Allows instumental ablative use of ligatures to direct objects
+
+    Usage:
+        ligā <rem> <rē>
+
+    Bind something with something else
+    """
+
+    key = "ligā"
+    aliases = ['liga']
+    locks = 'cmd:all()'
+    help_category = 'Iussa Latiīna'
+    auto_help = True
+
+    def func(self):
+        """
+        Handle the binding, setting a "ligāta" tag on the target with the ligature as value,
+        and setting the "ligāns" tag on the instrument with the target as value.
+        """
+
+        caller = self.caller
+
+        # Ensure computer syntax is ok
+        if not self.args or len(self.arglist) != 2:
+            caller.msg("Usage: ligā <rem> <rē>")
+            return
+
+        arg1 = self.arglist[0]
+        arg2 = self.arglist[1]
+
+        possessions = caller.contents
+        everything = caller.location.contents + possessions
+
+
+        ligature = False
+        # Make sure that caller is holding a ligature
+        for p in possessions:
+            if p.db.tenētur and p.typename == 'Ligātūra':
+                ligature = p
+
+        if not ligature:
+            caller.msg('Nūllum tenēs quō ligāre potes.')
+            return
+
+        # Idnetify ligature and target
+        entity1, arg1 = which_one(arg1, caller, everything)
+        if not entity1:
+            caller.msg(f"'{arg1}' nōn invēnistī!")
+            return
+        entity2, arg2 = which_one(arg2, caller, everything)
+        if not entity2:
+            caller.msg(f"'{arg2}' nōn invēnistī!")
+            return
+
+        if entity1 in [ligature]:
+            target = entity2
+            target_arg = arg2
+            ligature_arg = arg1
+        else:
+            target = entity1
+            target_arg = arg1
+            ligature_arg = arg2
+
+        # Don't let a ligature bind itself
+        if target == ligature:
+            caller.msg("Ligātūra sē ligārī nōn potest!")
+            return
+
+        # Make sure the ligature isn't already tying something else
+        if ligature.db.ligāns:
+            caller.msg(f"Aliquid {ligature.db.formae['abl_sg'][0]} iam ligātum est!")
+            return
+
+        # Check Grammar
+        if check_case(caller, target, target_arg, 'acc_sg') == False:
+            return
+
+        if check_case(caller, ligature, ligature_arg, 'abl_sg') == False:
+            return
+
+        target.db.ligāta = ligature.dbref
+        ligature.db.ligāns = target.dbref
+
+        target_acc = target.db.formae['acc_sg'][0]
+        ligature_abl = ligature.db.formae['abl_sg'][0]
+        caller_nom = caller.db.formae['nom_sg'][0]
+        ligature_sexus = ligature.db.sexus
+
+        caller.msg(f"{target_acc} {ligature_abl} ligāvistī.")
+        target.msg(f"{caller_nom} tē {ligature_abl} ligāvit.")
+        caller.location.msg_contents(
+                f"{caller_nom} {target_acc} {ligature_abl} ligāvit", 
+                exclude=(caller,target)
+                )
+
+        target.db.descriptive_name = f"{target.name} {ligature_abl} ligāt{us_a_um('nom_sg',target.db.sexus)} qu{'em' if ligature_sexus == 'māre' else 'am' if ligature_sexus == 'muliebre' else 'od'} tenet {caller_nom}." 
+
+class Solve(MuxCommand):
+    """
+    Loosen something from a ligature
+
+    Usage:
+        solve <rem> <rē>
+
+    """
+
+    key = "solve"
+    aliases = ["solue"]
+    locks = "cmd:all()"
+    help_category = "Iussa Latīna"
+    auto_help = True
+
+    def func(self):
+        """ implements the command """
+
+        caller = self.caller
+
+        # Make sure computer syntax is satisfied
+        if not self.args:
+            caller.msg("Quid quō solvere velis?")
+            return
+        elif len(self.arglist) != 2:
+            caller.msg("Usage: solve <rem> <rē>")
+            return
+
+        arg1 = self.arglist[0]
+        arg2 = self.arglist[1]
+
+        bound_objects = []
+        possessions = caller.contents
+        everything = caller.location.contents + possessions
+        for e in everything:
+            if e.db.ligāta:
+                bound_objects.append(e)
+
+        if len(bound_objects) == 0:
+            caller.msg("Nihil hīc ligātum est!")
+            return
+
+        # Idnetify ligature and target
+        entity1, arg1 = which_one(arg1, caller, bound_objects)
+        entity2, arg2 = which_one(arg2, caller, bound_objects)
+
+        if entity1:
+            target = entity1
+            target_arg = arg1
+            ligature_arg = arg2
+        elif entity2:
+            target = entity2
+            target_arg = arg2
+            ligature_arg = arg1
+        else:
+            caller.msg("Quid quō solvere velis?")
+            return
+
+        ligature = Ligātūra.objects.get(id=target.db.ligāta[1:])
+
+        # Check Grammar
+        if check_case(caller, target, target_arg, 'acc_sg') == False:
+            return
+
+        if check_case(caller, ligature, ligature_arg, 'abl_sg') == False:
+            return
+
+        target.db.ligāta = False
+        ligature.db.ligāns = False
+
+        target_acc = target.db.formae['acc_sg'][0]
+        ligature_abl = ligature.db.formae['abl_sg'][0]
+        caller_nom = caller.db.formae['nom_sg'][0]
+        ligature_sexus = ligature.db.sexus
+
+        caller.msg(f"{target_acc} {ligature_abl} solvistī.")
+        target.msg(f"{caller_nom} tē {ligature_abl} solvit.")
+        caller.location.msg_contents(
+                f"{caller_nom} {target_acc} {ligature_abl} solvit", 
+                exclude=(caller,target)
+                )
+
+        target.db.descriptive_name = False
+
 class IussaLatīnaCmdSet(default_cmds.CharacterCmdSet):
     """
     Command set for the Latin commands.
@@ -1257,6 +1452,8 @@ class IussaLatīnaCmdSet(default_cmds.CharacterCmdSet):
         self.add(Excipe())
         self.add(Inspice())
         self.add(Tenē())
+        self.add(Ligā())
+        self.add(Solve())
 
 class IussaAdministrātōrumCmdSet(default_cmds.CharacterCmdSet):
     """
