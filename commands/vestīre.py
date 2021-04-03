@@ -489,10 +489,11 @@ class Da(MuxCommand):
             bound_character = None
             possessions = caller.contents
             everything = caller.location.contents + possessions
+            ligature_sex = target.db.sexus
             for e in everything:
                 if e.dbref == target.db.ligāns:
                     bound_character = e
-        bound_character.db.descriptive_name = f"{bound_character.name} {target.db.formae['abl_sg'][0]} ligāt{us_a_um('nom_sg',bound_character.db.sexus)}"
+            bound_character.db.descriptive_name = f"{bound_character.name} {target.db.formae['abl_sg'][0]} ligāt{us_a_um('nom_sg',bound_character.db.sexus)} qu{'em' if ligature_sex == 'māre' else 'am' if ligature_sex == 'muliebre' else 'od'} {recipient.name} tenet."
 
         target.at_give(caller, recipient)
 

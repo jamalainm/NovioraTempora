@@ -210,6 +210,20 @@ class Cape(MuxCommand):
                     exclude=caller
                     )
 
+        # Account for ligatures
+        ligature = None
+        if target.typename == 'Ligātūra':
+            ligature = target
+
+            if ligature.db.ligāns:
+                ligature_sex = ligature.db.sexus
+                bound_entity = None
+                for s in stuff:
+                    if s.dbref == ligature.db.ligāns:
+                        bound_entity = s
+
+                bound_entity.db.descriptive_name = f"{bound_entity.name} {ligature.db.formae['abl_sg'][0]} ligāt{us_a_um('nom_sg',bound_entity.db.sexus)} qu{'em' if ligature_sex == 'māre' else 'am' if ligature_sex == 'muliebre' else 'od'} {caller.name} tenet"
+
         # move target to inventory if possible
         target.move_to(caller, quiet=True)
         target.at_get(caller)
@@ -886,6 +900,11 @@ class Pōne(MuxCommand):
             caller.msg(f"{target.name} in sē pōnī nōn potest!")
             return
 
+        # Don't let a ligature bound to someone else be put into a bag
+        if target.db.ligāns:
+            caller.msg(f"{target.name} in aliquō ligāt{us_a_um('nom_sg',target.db.sexus)} condī nōn potest.")
+            return
+
         # Manage volume and dimensions of target and container
         target_volume = target.db.physical['litra']
         container_max_volume = container.db.capax['max_vol']
@@ -1244,6 +1263,20 @@ class Tenē(MuxCommand):
                 caller.db.manibus_plēnīs.append(hand_specified)
                 caller.db.manibus_vacuīs.remove(hand_specified)
                 caller.db.toll_fer['ferēns'] += target.db.physical['massa']
+
+        # Account for ligatures
+        ligature = None
+        if target.typename == 'Ligātūra':
+            ligature = target
+
+            if ligature.db.ligāns:
+                bound_entity = None
+                ligature_sex = ligature.db.sexus
+                for s in stuff:
+                    if s.dbref == ligature.db.ligāns:
+                        bound_entity = s
+
+                bound_entity.db.descriptive_name = f"{bound_entity.name} {ligature.db.formae['abl_sg'][0]} ligāt{us_a_um('nom_sg',bound_entity.db.sexus)} qu{'em' if ligature_sex == 'māre' else 'am' if ligature_sex =='muliebre' else 'od'} {caller.name} tenet"
 
         caller.msg(f"{target.db.formae['acc_sg'][0]} {hand_specified} tenēs.")
         caller.location.msg_contents(f"{caller.name} {target.db.formae['acc_sg'][0]} {hand_specified} tenet.",exclude=caller)
