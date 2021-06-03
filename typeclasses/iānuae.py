@@ -18,7 +18,7 @@ from evennia.utils.utils import inherits_from
 from evennia.utils import create
 
 from utils.latin_language.adjective_agreement import us_a_um
-from utils.latin_language.populate_forms import populate_forms
+from utils.latin_language.decline_noun import DeclineNoun
 from utils.latin_language.check_grammar import check_case
 
 from unidecode import unidecode
@@ -45,26 +45,23 @@ class Iānua(Exitus):
         self.db.closed = False
 
         # add all of the case endings to attributes
-        if hasattr(self, 'db'):
-            if self.db.formae:
-                if len(self.db.formae['nom_sg']) > 1:
-                    nōmen_nom = self.db.formae['nom_sg'][1]
-                    nōmen_gen = self.db.formae['gen_sg'][1]
 
+        nominative = self.db.formae['nom_sg'][0]
+        genitive = self.db.formae['gen_sg'][0]
+        sexus = self.db.sexus
 
-                nominative = self.db.formae['nom_sg'][0]
-                genitive = self.db.formae['gen_sg'][0]
-                sexus = self.db.sexus
+        word = DeclineNoun(nom=nominative, gen=genitive, gender=sexus)
+        forms = word.make_paradigm()
 
-                populate_forms(self, nom=nominative, gen=genitive, gender=sexus)
+        for key, value in forms.items():
+            if key in self.db.formae:
+                if value not in self.db.formae[key]:
+                    self.db.formae[key].append(value)
+            else:
+                self.db.formae.update({key: [value]})
 
-                # Check if there is a nōmen for this character
-                if len(self.db.formae['nom_sg']) > 1:
-
-                    populate_forms(self, nom=nōmen_nom, gen=nōmen_gen, gender=sexus)
-
-                self.db.Latin = True
-                self.db.aliases = None
+        self.db.Latin = True
+        self.aliases.add(unidecode(self.key))
 
 
 
@@ -335,9 +332,10 @@ class AperīClaudeIānuam(default_cmds.MuxCommand):
             intended_door = self.arglist[0]
         else:
             for o in exits:
-                if o.key in self.args:
+                if unidecode(o.key) in unidecode(self.args):
                     intended_direction = o
-                    intended_door = self.args.replace(o.key,'')
+                    intended_door = unidecode(self.args).replace(unidecode(o.key),'')
+                    intended_door = intended_door.strip()
 
         if not intended_direction or not intended_door:
             caller.msg("Quid in quam partem aperīre vīs?")

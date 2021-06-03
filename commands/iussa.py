@@ -537,7 +537,7 @@ class Mūniātur(ObjManipCommand):
         caller = self.caller
 
         if not self.lhslist or len(self.lhslist) != 3:
-            caller.msg("Scrībe: mūniātur <room>, <gen>, <sexus> [= <hūc>, <illūc>]")
+            caller.msg("Scrībe: mūniātur <room>, <gen>, <sexus> [= <illūc>, <illūc>]")
             return
 
         location = caller.location
@@ -581,14 +581,14 @@ class Mūniātur(ObjManipCommand):
         # Check to see if exits should be created
         if self.rhslist:
             if self.rhslist[0] == '-':
-                exit_to_here = False
+                exit_to_there = False
             else:
-                exit_to_here = self.rhslist[0]
+                exit_to_there = self.rhslist[0]
             if self.rhslist[1]:
                 if self.rhslist[1] == '-':
-                    exit_to_there = False
+                    exit_to_here = False
                 else:
-                    exit_to_there = self.rhslist[1]
+                    exit_to_here = self.rhslist[1]
 
         else:
             if location.db.lang == 'latin':
