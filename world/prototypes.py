@@ -159,6 +159,15 @@ PLAIN_HEARTH = {
         "desc":"A large hearth; it's diameter is nearly 1 |mpassus|n (pace).",
         "physical":{"material":"stone","rigēns":True,"massa":8512,"litra":3140}
         }
+
+CATULUS = {
+        "key":"catulus",
+        "typeclass":"typeclasses.persōnae.Errāns",
+        "formae":{"nom_sg":["catulus"],"gen_sg":["catulī"]},
+        "sexus":"māre",
+        "desc":"A puppy!",
+        "ligābilis":True,
+        }
 # from random import randint
 #
 # GOBLIN = {

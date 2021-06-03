@@ -11,7 +11,7 @@ creation commands.
 import evennia
 
 from evennia.contrib.ingame_python.typeclasses import EventCharacter
-from evennia import DefaultRoom, DefaultCharacter
+from evennia import DefaultRoom, DefaultCharacter, search_object
 from world.tb_basic import TBBasicCharacter
 
 from evennia.utils.utils import inherits_from
@@ -357,7 +357,9 @@ class Persōna(EventCharacter,TBBasicCharacter):
 
         if ligature:
             if ligature.db.ligāns:
-                bound_entity = Persōna.objects.get(id=ligature.db.ligāns[1:])
+#                bound_entity = Persōna.objects.get(id=ligature.db.ligāns[1:])
+#                bound_entity = Persōna.objects.get(id=ligature.db.ligāns[1:])
+                bound_entity = search_object(ligature.db.ligāns)[0]
                 if bound_entity != self:
                     bound_entity.move_to(self.location)
 
@@ -547,6 +549,34 @@ class Persōna(EventCharacter,TBBasicCharacter):
 
         super().announce_move_to(source_location, msg=string, mapping=mapping)
 
+    def get_display_name(self, looker, **kwargs):
+        """
+        Displays the name of the object in a viewer-aware manner.
+
+        Args:
+            looker (TypedObject): The object or account that is looking
+                at/getting inforamtion for this object.
+
+        Returns:
+            name (str): A string containing the name of the object,
+                including the DBREF if this user is privileged to control
+                said object.
+
+        Notes:
+            This function could be extended to change how object names
+            appear to users in character, but be wary. This function
+            does not change an object's keys or aliases when
+            searching, and is expected to produce something useful for
+            builders.
+
+        """
+        if self.locks.check_lockstring(looker, "perm(Builder)"):
+            return "{}(#{})".format(self.name, self.id)
+        elif self.db.descriptive_name:
+            return self.db.descriptive_name
+        else:
+            return self.name
+
 class Errāns(Persōna):
     """
     This is an NPC that will move randomly every minute or so.
@@ -582,30 +612,8 @@ class Errāns(Persōna):
         
             self.move_to(new_room)
 
-    def get_display_name(self, looker, **kwargs):
-        """
-        Displays the name of the object in a viewer-aware manner.
-
-        Args:
-            looker (TypedObject): The object or account that is looking
-                at/getting inforamtion for this object.
-
-        Returns:
-            name (str): A string containing the name of the object,
-                including the DBREF if this user is privileged to control
-                said object.
-
-        Notes:
-            This function could be extended to change how object names
-            appear to users in character, but be wary. This function
-            does not change an object's keys or aliases when
-            searching, and is expected to produce something useful for
-            builders.
-
-        """
-        if self.locks.check_lockstring(looker, "perm(Builder)"):
-            return "{}(#{})".format(self.name, self.id)
-        elif self.db.descriptive_name:
-            return self.db.descriptive_name
-        else:
-            return self.name
+class Canis(Errāns):
+    """
+    This is an NPC subtype that will move, staying in its zone, but it will also be
+    susceptible to being bound
+    """

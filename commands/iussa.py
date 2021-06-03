@@ -26,6 +26,7 @@ from utils.latin_language.gens_class_praenomina import name_data
 from typeclasses.locī import Locus
 from typeclasses.exitūs import Exitus
 from typeclasses.rēs import Ligātūra
+from typeclasses.iānuae import Aperiātur, AperīClaudeIānuam
 # from typeclasses.persōnae import Persōna
 
 class MuxCommand(muxcommand.MuxCommand):
@@ -1294,7 +1295,7 @@ class Ligā(MuxCommand):
     key = "ligā"
     aliases = ['liga']
     locks = 'cmd:all()'
-    help_category = 'Iussa Latiīna'
+    help_category = 'Iussa Latīna'
     auto_help = True
 
     def func(self):
@@ -1361,6 +1362,10 @@ class Ligā(MuxCommand):
             return
 
         if check_case(caller, ligature, ligature_arg, 'abl_sg') == False:
+            return
+
+        if not target.db.ligābilis:
+            caller.msg(f"{target.db.formae['acc_sg'][0]} ligāre nōn potes.")
             return
 
         target.db.ligāta = ligature.dbref
@@ -1487,6 +1492,7 @@ class IussaLatīnaCmdSet(default_cmds.CharacterCmdSet):
         self.add(Tenē())
         self.add(Ligā())
         self.add(Solve())
+        self.add(AperīClaudeIānuam())
 
 class IussaAdministrātōrumCmdSet(default_cmds.CharacterCmdSet):
     """
@@ -1503,3 +1509,4 @@ class IussaAdministrātōrumCmdSet(default_cmds.CharacterCmdSet):
         self.add(Creātur())
         self.add(Mūniātur())
         self.add(Nascātur())
+        self.add(Aperiātur())
