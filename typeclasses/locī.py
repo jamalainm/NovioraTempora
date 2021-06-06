@@ -94,11 +94,11 @@ class Locus(EventRoom):
                 things[key].append(con)
 
         # get description, build string
-        string = "|c%s|n\n" % self.get_display_name(looker)
+        string = "\n|c%s|n\n" % self.get_display_name(looker)
         desc = self.db.desc
 
         if desc:
-            string += "%s" % desc
+            string += "%s\n" % desc
 
         if exits:
             # Changing this string so that exits appear green
@@ -107,7 +107,7 @@ class Locus(EventRoom):
 #            for exit in exits:
 #                colorful_exits.append(f"|lc{exit}|lt|g{exit}|n|le")
             colorful_exits = sorted(colorful_exits)
-            string += "\n|wAd hōs locōs īre licet:|n\n " + list_to_string(colorful_exits)
+            string += "\n|wAd hōs locōs īre licet:|n\n " + list_to_string(colorful_exits) + "\n"
         if users or things:
             # handle pluralization of things (never pluralize users)
             thing_strings = []

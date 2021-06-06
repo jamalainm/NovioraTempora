@@ -95,11 +95,12 @@ class Spectā(MuxCommand):
 
             # check grammar of Latin objects
             if hasattr(target, 'db'):
-                if target.db.destination:
-                    pass
-                elif target.db.latin:
-                    if check_case(caller, target, self.args, 'acc_sg') == False:
-                        return
+                if not target.is_typeclass("typeclasses.exitūs.Exitus",exact=False):
+#                if not target.db.destination:
+#                    pass
+                    if target.db.latin:
+                        if check_case(caller, target, self.args, 'acc_sg') == False:
+                            return
 
         self.msg((caller.at_look(target), {"type": "look"}), options=None)
 

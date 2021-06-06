@@ -62,6 +62,7 @@ class Iānua(Exitus):
 
         self.db.Latin = True
         self.aliases.add(unidecode(self.key))
+#        self.setdesc(nominative)
 
 
 
@@ -233,6 +234,8 @@ class Aperiātur(default_cmds.ObjManipCommand):
                     location.name,
                     string,
                 )
+
+                exit_obj.setdesc(exit_obj.db.formae['nom_sg'][0])
             else:
                 string = "Error: Reditus '%s' nōn factus est." % exit_name
 
@@ -355,10 +358,12 @@ class AperīClaudeIānuam(default_cmds.MuxCommand):
 
         return_exit = door.db.return_exit
 
+        # Open door
         if unidecode(self.cmdstring) == 'aperi':
 #            if door.locks.check(self.caller, "traverse"):
             if door.db.closed == False:
                 self.caller.msg(f"{door.db.formae['nom_sg'][0]} iam apert{us_a_um('nom_sg',door.db.sexus)} est")
+                return
             else:
                 door.setlock("traverse:true()")
                 self.caller.msg(f"{door.db.formae['acc_sg'][0]} aperuistī.")
@@ -371,10 +376,13 @@ class AperīClaudeIānuam(default_cmds.MuxCommand):
                 return_exit.location.msg_contents(
                         f"{return_exit.db.formae['nom_sg'][0]} {return_exit.key} apert{us_a_um('nom_sg',return_exit.db.sexus)} est."
                         )
+                door.setdesc(f"{door.db.formae['nom_sg'][0]} apert{us_a_um('nom_sg',door.db.sexus)}")
+        # Close door
         else: # close
 #            if not door.locks.check(self.caller, "traverse"):
             if door.db.closed == True:
                 self.caller.msg(f"{door.db.formae['nom_sg'][0]} iam claus{us_a_um('nom_sg',door.db.sexus)} est")
+                return
             else:
                 door.setlock("traverse:false()")
                 self.caller.msg(f"{door.db.formae['acc_sg'][0]} clausistī.")
@@ -387,3 +395,4 @@ class AperīClaudeIānuam(default_cmds.MuxCommand):
                 return_exit.location.msg_contents(
                         f"{return_exit.db.formae['nom_sg'][0]} {return_exit.key} claus{us_a_um('nom_sg',return_exit.db.sexus)} est."
                         )
+                door.setdesc(f"{door.db.formae['nom_sg'][0]} claus{us_a_um('nom_sg',door.db.sexus)}")
