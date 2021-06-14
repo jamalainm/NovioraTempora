@@ -78,9 +78,11 @@ class DeclineNoun:
 
     def third_declension(self):
 
-        from cltk.stem.latin.syllabifier import Syllabifier
+#        from cltk.stem.latin.syllabifier import Syllabifier
+#       Above deprecated with newer version of cltk
+        from cltk.phonology.lat.syllabifier import syllabify
 
-        syllabifier = Syllabifier()
+#        syllabifier = Syllabifier()
 
         vowels = ['a','e','i','o','u','ā','ē','ī','ō','ū']
 
@@ -95,8 +97,10 @@ class DeclineNoun:
 
         forms[5] = self.nom
 
-        nom_syllable = len(syllabifier.syllabify(self.nom))
-        gen_syllable = len(syllabifier.syllabify(self.gen))
+#        nom_syllable = len(syllabifier.syllabify(self.nom))
+        nom_syllable = len(syllabify(self.nom))
+#        gen_syllable = len(syllabifier.syllabify(self.gen))
+        gen_syllable = len(syllabify(self.gen))
 
         i_stem = False
 

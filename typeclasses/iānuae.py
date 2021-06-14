@@ -126,6 +126,7 @@ class Aperiātur(default_cmds.ObjManipCommand):
     """
 
     key = "aperiātur"
+    aliases = ['aperiatur']
     locks = "cmd:perm(open) or perm(Builder)"
     help_category = "Building"
 
