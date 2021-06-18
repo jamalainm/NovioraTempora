@@ -32,7 +32,7 @@ from evennia.settings_default import *
 ######################################################################
 
 # This is the name of your game. Make it catchy!
-SERVERNAME = "mygame"
+SERVERNAME = "Ō Tempora! Ō Mōrēs!"
 BASE_CHARACTER_TYPECLASS = "typeclasses.persōnae.Persōna"
 BASE_OBJECT_TYPECLASS = "typeclasses.rēs.Rēs"
 BASE_ROOM_TYPECLASS = "typeclasses.locī.Locus"
@@ -40,6 +40,9 @@ BASE_EXIT_TYPECLASS = "typeclasses.exitūs.Exitus"
 DEFAULT_HOME = '#56'
 
 MULTISESSION_MODE = 2
+
+TIME_FACTOR = 60
+TIME_GAME_EPOCH = None
 
 INSTALLED_APPS += ('web.chargen',)
 
