@@ -20,6 +20,7 @@ from evennia.utils import create
 from utils.latin_language.adjective_agreement import us_a_um, us_a_um2
 from utils.latin_language.decline_noun import DeclineNoun
 from utils.latin_language.check_grammar import check_case
+from utils.latin_language.esse import esse
 
 from unidecode import unidecode
 
@@ -363,7 +364,7 @@ class AperīClaudeIānuam(default_cmds.MuxCommand):
         if unidecode(self.cmdstring) == 'aperi':
 #            if door.locks.check(self.caller, "traverse"):
             if door.db.closed == False:
-                self.caller.msg(f"{door.db.formae['nom_sg'][0]} iam apert{us_a_um('nom_sg',door.db.sexus)} est")
+                self.caller.msg(f"{door.db.formae['nom_sg'][0]} iam apert{us_a_um2('nom_sg',door.db.sexus,noun=door)} {esse(door)}.")
                 return
             else:
                 door.setlock("traverse:true()")
@@ -382,7 +383,7 @@ class AperīClaudeIānuam(default_cmds.MuxCommand):
         else: # close
 #            if not door.locks.check(self.caller, "traverse"):
             if door.db.closed == True:
-                self.caller.msg(f"{door.db.formae['nom_sg'][0]} iam claus{us_a_um('nom_sg',door.db.sexus)} est")
+                self.caller.msg(f"{door.db.formae['nom_sg'][0]} iam claus{us_a_um2('nom_sg',door.db.sexus,noun=door)} {esse(door)}")
                 return
             else:
                 door.setlock("traverse:false()")
