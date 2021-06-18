@@ -17,7 +17,7 @@ from typeclasses.exitūs import Exitus
 from evennia.utils.utils import inherits_from
 from evennia.utils import create
 
-from utils.latin_language.adjective_agreement import us_a_um
+from utils.latin_language.adjective_agreement import us_a_um, us_a_um2
 from utils.latin_language.decline_noun import DeclineNoun
 from utils.latin_language.check_grammar import check_case
 
@@ -377,7 +377,7 @@ class AperīClaudeIānuam(default_cmds.MuxCommand):
                 return_exit.location.msg_contents(
                         f"{return_exit.db.formae['nom_sg'][0]} {return_exit.key} apert{us_a_um('nom_sg',return_exit.db.sexus)} est."
                         )
-                door.setdesc(f"{door.db.formae['nom_sg'][0]} apert{us_a_um('nom_sg',door.db.sexus)}")
+                door.setdesc(f"{door.db.formae['nom_sg'][0]} apert{us_a_um2('nom_sg',door.db.sexus,noun=door)}")
         # Close door
         else: # close
 #            if not door.locks.check(self.caller, "traverse"):
@@ -396,4 +396,4 @@ class AperīClaudeIānuam(default_cmds.MuxCommand):
                 return_exit.location.msg_contents(
                         f"{return_exit.db.formae['nom_sg'][0]} {return_exit.key} claus{us_a_um('nom_sg',return_exit.db.sexus)} est."
                         )
-                door.setdesc(f"{door.db.formae['nom_sg'][0]} claus{us_a_um('nom_sg',door.db.sexus)}")
+                door.setdesc(f"{door.db.formae['nom_sg'][0]} claus{us_a_um2('nom_sg',door.db.sexus,noun=door)}")

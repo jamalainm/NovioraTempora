@@ -25,7 +25,7 @@ class DeclineNoun:
             return [3, self.gen[:-2]]
         elif self.gen[-2:] == "ūs":
             return [4, self.gen[:-2]]
-        elif self.nom[-2:] == "ēs":
+        elif self.nom[-2:] == "ēs" and self.gen[-1] == "ī":
             return [5, self.gen[:-1]]
         elif self.gen[-2:] == "um":
             if self.nom[-2:] == "ae":
@@ -34,6 +34,8 @@ class DeclineNoun:
                 return [7, self.nom[:-1]]
             elif self.nom[-1] == "a":
                 return [8, self.nom[:-1]]
+            else:
+                return [9, self.gen[:-2]]
         else:
             return [2, self.gen[:-1]]
 
@@ -213,6 +215,22 @@ class DeclineNoun:
 
         return forms
 
+    def third_plural(self):
+
+        base = DeclineNoun.id_declension(self)[1]
+
+        if self.gender == 'neutrum':
+            endings = ['a','um','ibus','a','ibus','a','a','um','ibus','a','ibus','a']
+        else:
+            endings = ['ēs','um','ibus','ēs','ibus','ēs','ēs','um','ibus','ēs','ibus','ēs']
+
+        forms = []
+
+        for i in endings:
+            forms.append(base + i)
+
+        return forms
+
     def make_paradigm(self):
         
         labels = ['nom_sg','gen_sg','dat_sg','acc_sg','abl_sg','voc_sg','nom_pl','gen_pl','dat_pl','acc_pl','abl_pl','voc_pl']
@@ -233,8 +251,10 @@ class DeclineNoun:
             forms = DeclineNoun.first_plural(self)
         elif DeclineNoun.id_declension(self)[0] == 7:
             forms = DeclineNoun.second_plural_masc(self)
-        else:
+        elif DeclineNoun.id_declension(self)[0] == 8:
             forms = DeclineNoun.second_plural_neut(self)
+        else:
+            forms = DeclineNoun.third_plural(self)
 
         declension = {}
         for index,value in enumerate(labels):

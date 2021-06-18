@@ -22,6 +22,7 @@ from commands.iussa import IussaLatīnaCmdSet, IussaAdministrātōrumCmdSet
 from commands.vestīre import VestītaPersōnaCmdSet
 # from commands.iussa_rērum import Ligā
 from world.tb_basic import BattleCmdSet
+from commands.tempus import Tempus
 
 
 class CharacterCmdSet(default_cmds.CharacterCmdSet):
@@ -64,6 +65,7 @@ class PersōnaCmdSet(default_cmds.CharacterCmdSet):
         self.add(IussaLatīnaCmdSet())
         self.add(VestītaPersōnaCmdSet())
         self.add(IussaAdministrātōrumCmdSet())
+        self.add(Tempus())
         #
         # For combat
         #

@@ -13,7 +13,7 @@ from utils.latin_language.populate_forms import populate_forms
 from utils.latin_language.list_to_string import list_to_string
 from utils.latin_language.get_numbered_name import get_numbered_name
 
-from evennia.utils import ansi
+from evennia.utils import ansi, gametime
 
 # from typeclasses.inflected_noun import InflectedNoun
 
