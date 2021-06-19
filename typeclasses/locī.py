@@ -67,6 +67,19 @@ class Locus(EventRoom):
 
         if not looker:
             return ""
+
+        # If it's dark, they can't see
+        if looker.location.db.āter:
+            lūx = False
+            contents = looker.contents + looker.location.contents
+            for con in contents:
+                if con.db.ardēns == True:
+                    lūx = True
+
+            if lūx == False:
+                looker.msg("Nihil per tenebrās vidēre potes.")
+                return
+
         # get and identify all objects
         visible = (con for con in self.contents if con != looker and con.access(looker, "view"))
         exits, users, things = [], [], defaultdict(list)

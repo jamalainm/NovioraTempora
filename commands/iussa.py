@@ -5,10 +5,11 @@ Iussa
 Iussa describe the Latin commands and syntax for interacting with the world
 
 """
+import datetime 
 from django.conf import settings
 
 from evennia.commands.default import muxcommand
-from evennia.utils import create
+from evennia.utils import create, gametime
 from evennia import default_cmds
 from evennia.objects.models import ObjectDB
 
@@ -72,6 +73,18 @@ class Spectā(MuxCommand):
         Handle the looking.
         """
         caller = self.caller
+
+        # If it's dark, they can't see
+        if caller.location.db.āter:
+            lūx = False
+            contents = caller.contents + caller.location.contents
+            for con in contents:
+                if con.db.ardēns == True:
+                    lūx = True
+
+            if lūx == False:
+                caller.msg("Nihil per tenebrās vidēre potes.")
+                return
 
         # checking out the room
         if not self.args:

@@ -1,5 +1,6 @@
 # mygame/tempora.py
 
+import evennia
 from evennia.utils import gametime
 from typeclasses.locī import Locus
 
@@ -8,6 +9,11 @@ def prīmā_lūce():
     # Browse all rooms
     for locus in Locus.objects.all():
         locus.msg_contents("|ySōl orītur.|n")
+
+    # Set "dark" = False for external rooms
+    externa = evennia.search_tag("forīs", category="zōna")
+    for e in externa:
+        e.db.āter=False
 
 def incipe_sōlem_orīrī():
     """ schedule a sunrise event to happen every day at 6 AM """
@@ -19,6 +25,12 @@ def occāsū():
     # Browse all rooms
     for locus in Locus.objects.all():
         locus.msg_contents("|rSōl occidit.|n")
+
+    for e in externa:
+        e.db.āter=True
+
+    # Set "dark" = True for external rooms
+    externa = evennia.search_tag("forīs", category="zōnā")
 
 def incipe_sōlem_occidere():
     """ schedule a sunset event to happen every day at 6 PM """
