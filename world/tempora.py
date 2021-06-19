@@ -26,11 +26,11 @@ def occāsū():
     for locus in Locus.objects.all():
         locus.msg_contents("|rSōl occidit.|n")
 
+    # Set "dark" = True for external rooms
+    externa = evennia.search_tag("forīs", category="zōnā")
     for e in externa:
         e.db.āter=True
 
-    # Set "dark" = True for external rooms
-    externa = evennia.search_tag("forīs", category="zōnā")
 
 def incipe_sōlem_occidere():
     """ schedule a sunset event to happen every day at 6 PM """

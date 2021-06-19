@@ -21,7 +21,7 @@ class Tempus(Command):
         
         tempus = datetime.datetime.fromtimestamp(gametime.gametime(absolute=True))
         hōra = tempus.hour
-        if hōra > 18 or hōra < 6:
+        if hōra > 17 or hōra < 6:
             self.msg("Nox est.")
             # set outside rooms as dark
         else:

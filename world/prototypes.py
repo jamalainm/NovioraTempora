@@ -134,7 +134,7 @@ TUNIC = {
 
 LAMP = {
         "key":"lūmen",
-        "typeclass":"typeclasses.rēs.Flammable",
+        "typeclass":"typeclasses.rēs.Inflammābilis",
         "formae":{"nom_sg":["lūmen"],"gen_sg":["lūminis"]},
         "sexus":"neutrum",
         "desc":"a small, simple, terracotta oil lamp",
@@ -144,7 +144,7 @@ LAMP = {
 VESTAL_HEARTH = {
         "key":"Focus Vestae",
 #        "location":"#266",
-        "typeclass":"typeclasses.rēs.Hearth",
+        "typeclass":"typeclasses.rēs.Inflammābilis",
         "formae":{"nom_sg":["focus"],"gen_sg":["focī"]},
         "sexus":"māre",
         "desc":"A large, marble hearth; it's diameter is nearly 1 |mpassus|n (pace).",
@@ -153,7 +153,7 @@ VESTAL_HEARTH = {
 
 PLAIN_HEARTH = {
         "key":"focus",
-        "typeclass":"typeclasses.rēs.Hearth",
+        "typeclass":"typeclasses.rēs.Inflammābilis",
         "formae":{"nom_sg":["focus"],"gen_sg":["focī"]},
         "sexus":"māre",
         "desc":"A large hearth; it's diameter is nearly 1 |mpassus|n (pace).",

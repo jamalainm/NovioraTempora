@@ -218,3 +218,10 @@ class Ligātūra(Rēs):
 
 #     def at_object_creation(self):
 #         self.cmdset.add(LigātūraCmdSet(), permanent=True)
+
+class Inflammābilis(Rēs):
+
+    def at_object_creation(self):
+
+        self.db.inflammābilis = True
+        self.db.ardēns = True
