@@ -682,6 +682,7 @@ class Creātur(MuxCommand):
         # Make sure a proper gender is accepted
         sexus = self.arglist[2]
         if sexus not in ['māre','muliebre','neutrum']:
+            caller.msg(f"Here is the gender specified: {self.arglist[2]}")
             caller.msg("Estne sexus 'māre' an 'muliebre' an 'neutrum'?")
             return
 

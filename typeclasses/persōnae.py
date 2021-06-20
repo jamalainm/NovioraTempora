@@ -573,7 +573,7 @@ class Persōna(EventCharacter,TBBasicCharacter):
         if self.locks.check_lockstring(looker, "perm(Builder)"):
             return "{}(#{})".format(self.name, self.id)
         elif self.db.descriptive_name:
-            return self.db.descriptive_name
+            return self.db.ldesc
         else:
             return self.name
 

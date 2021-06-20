@@ -131,8 +131,10 @@ class Locus(EventRoom):
                     key, _ = get_numbered_name(itemlist[0], nitem, looker, key=key)
                     if itemlist[0].db.ardēns:
                         key = "|y(ardēns)|n " + key
-                    if itemlist[0].db.descriptive_name:
-                        key = itemlist[0].db.descriptive_name
+#                    if itemlist[0].db.descriptive_name:
+                    if itemlist[0].db.vīsus:
+#                        key = itemlist[0].db.descriptive_name
+                        key = itemlist[0].db.vīsus
                 else:
 #                    key = [item.get_numbered_name(nitem, looker, key=key)[1] for item in itemlist][
                     key = [get_numbered_name(item, nitem, looker, key=key)[1] for item in itemlist][
