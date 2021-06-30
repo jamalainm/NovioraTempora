@@ -118,6 +118,10 @@ class Persōna(EventCharacter,TBBasicCharacter):
                         'max': round(strength * 15 * 0.45, 1)
                         }
 
+                # Set experience and level
+                self.db.gradus = 1
+                self.db.pp = 0
+
             else:
                 pass
         else:
