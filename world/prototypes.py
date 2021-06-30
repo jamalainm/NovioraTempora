@@ -168,6 +168,26 @@ CATULUS = {
         "desc":"A puppy!",
         "ligābilis":True,
         }
+BOOKCASE = {
+        "key":"librārium",
+        "typeclass":"typeclasses.rēs.Rēs",
+        "formae": {"nom_sg":["librārium"],"gen_sg":["librāriī"]},
+        "sexus":"neutrum",
+        "desc":"A bookcase",
+        'physical':{"material":"wood","rigēns":True,"litra":72,"massa":75},
+        'capax':{'max_vol':71,'rem_vol':71,"x":1.2,"y":1.5,"z":0.4},
+        'vīsus':'A large bookcase with ample space for scrolls',
+        }
+BOOK = {
+        "key":"liber",
+        "typeclass":"typeclasses.rēs.Rēs",
+        "formae": {"nom_sg":["liber"],"gen_sg":['librī']},
+        "sexus":"māre",
+        "desc":"A scroll filled with Latin",
+        "physical":{"material":"papyrus","rigēns":True,"litra":0.08,"massa":0.2,"x":0.2,"y":0.02,"z":0.02},
+        "vīsus":"A book (liber) in the form of a scroll",
+        }
+
 # from random import randint
 #
 # GOBLIN = {
