@@ -122,6 +122,12 @@ class Persōna(EventCharacter,TBBasicCharacter):
                 self.db.gradus = 1
                 self.db.pp = 0
 
+                # Set known characters
+                self.db.familiārēs = []
+
+                # Set quests
+                self.db.quaestiōnēs = {'inceptae': [], 'perfectae': []}
+
             else:
                 pass
         else:
