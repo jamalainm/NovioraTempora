@@ -46,7 +46,7 @@ from random import choice
 from random import randint
 from random import random
 from evennia import DefaultCharacter, Command, default_cmds, DefaultScript
-from commands.iussa import MuxCommand
+from commands.command import MuxCommand
 from evennia.commands.default.help import CmdHelp
 # adding the following to begin translation into Latin
 from utils.latin_language.which_one import which_one

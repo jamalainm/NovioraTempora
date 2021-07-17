@@ -14,6 +14,10 @@ from utils.latin_language.list_to_string import list_to_string
 from utils.latin_language.get_numbered_name import get_numbered_name
 
 from evennia.utils import ansi, gametime
+from evennia import utils
+
+from typeclasses.persōnae import Persōna
+from typeclasses.patientēs import Patiēns
 
 # from typeclasses.inflected_noun import InflectedNoun
 
@@ -146,3 +150,16 @@ class Locus(EventRoom):
 
         return string
 
+    def at_object_receive(self, obj, source_location):
+        if utils.inherits_from(obj, 'typeclasses.patientēs.Patiēns'): # An NPC has entered
+            pass
+        else:
+            if utils.inherits_from(obj, 'typeclasses.persōnae.Persōna'):
+                # A PC has entered, NPC is caught above.
+                # Cause the character to look around
+                obj.execute_cmd('specta')
+                for item in self.contents:
+                    if utils.inherits_from(item, 'typeclasses.patientēs.Patiēns'):
+                        # An NPC is in the room
+                        item.at_char_entered(obj)
+                        

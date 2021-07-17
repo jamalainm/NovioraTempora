@@ -354,7 +354,7 @@ class Persōna(EventCharacter,TBBasicCharacter):
         return True
 
     def at_after_move(self,source_location):
-        super().at_after_move(source_location)
+#        super().at_after_move(source_location)
 
         # Bring bound characters with you on move
         possessions = self.contents
@@ -386,7 +386,7 @@ class Persōna(EventCharacter,TBBasicCharacter):
         if self.db.pv:
             prompt = f"|wVīta: {self.db.pv['nunc']}/{self.db.pv['max']}"
 
-            self.msg(prompt)
+#            self.msg(prompt)
 
     def return_appearance(self, looker, **kwargs):
             """

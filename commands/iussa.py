@@ -721,12 +721,124 @@ class Creātur(MuxCommand):
 
         caller.msg(message)
 
+#class Nascātur(MuxCommand):
+#    """
+#    Create an NPC
+#
+#    Usage:
+#        nascātur <praenomen>, [<nomen>], <sexus> = <genitive praenomen>, <genitive nomen>
+#
+#    """
+#
+#    key = "nascātur"
+#    aliases = ["nascatur"]
+#    locks = "cmd:perm(Builder)"
+#    help_category = "Iussa Administrātōrum"
+#    auto_help = True
+#
+#    def func(self):
+#        """
+#        The command for creating an NPC itself
+#        """
+#
+#        caller = self.caller
+#
+#        self.nōmen = None
+#        self.nōmen_gen = None
+#        self.gens = None
+#
+#        sexus = {'māre': 'masculine', 'muliebre': 'feminine'}
+#
+#        if not self.args:
+#            self.sexus = choice(list(sexus.keys()))
+#            self.gender = sexus[self.sexus]
+#            self.gens = choice(list(name_data.keys()))
+#            self.praenōmen = choice(name_data[self.gens]['praenomina'][self.gender])
+#            if self.sexus == 'muliebre':
+#                self.nōmen = self.gens
+#            elif self.sexus == 'māre':
+#                self.nōmen = self.gens[:-1] + 'us'
+#            else:
+#                self.nōmen = self.gens[:-1] + 'um'
+#
+#            if self.sexus == 'muliebre':
+#                self.praenōmen_gen = self.praenōmen + 'e'
+#                self.nōmen_gen = self.nōmen + 'e'
+#            else:
+#                self.nōmen_gen = self.nōmen[:-2] + 'ī'
+#                if self.praenōmen == 'Opiter':
+#                    self.praenōmen_gen = 'Opitris'
+#                elif self.praenōmen == 'Caesō':
+#                    self.praenōmen_gen = 'Caesōnis'
+#                elif self.praenōmen == 'Sertor':
+#                    self.praenōmen_gen = 'Sertōris'
+#                else:
+#                    self.praenōmen_gen = self.praenōmen[:-2] + 'ī'
+#            nōmina = self.praenōmen + ' ' + self.nōmen
+#
+#        elif not self.rhslist:
+#            caller.msg("Usage: nascātur [<praenōmen>, [<nōmen>], <sexus> = <praenōminis>, [<nōminis>]]")
+#        elif self.lhslist[-1] not in ['māre', 'muliebre', 'neutrum']:
+#            caller.msg("Usage: nascātur [<praenōmen>, [<nōmen>], <sexus> = <praenōminis>, [<nōminis>]]")
+#        elif len(self.lhslist) > 2 and len(self.rhslist) == 2:
+#            self.praenōmen = self.lhslist[0]
+#            self.praenōmen_gen = self.rhslist[0]
+#            self.nōmen = self.lhslist[1]
+#            self.nōmen_gen = self.rhslist[1]
+#            self.sexus = self.lhslist[2]
+#            if self.sexus == 'muliebre':
+#                self.gens = self.nōmen
+#            else:
+#                self.gens = self.nōmen[:-2] + 'a'
+#        else:
+#            self.praenōmen = self.lhslist[0]
+#            self.praenōmen_gen = self.rhslist[0]
+#            self.sexus = self.lhslist[1]
+#
+#        if self.nōmen:
+#            nōmina = self.praenōmen + ' ' + self.nōmen
+#        else:
+#            nōmina = self.praenōmen
+##        home = 56
+#        home = ObjectDB.objects.get_id(settings.DEFAULT_HOME)
+#        typeclass = 'typeclasses.patientēs.Dux'
+#
+#        nom_sg = [self.praenōmen]
+#        gen_sg = [self.praenōmen_gen]
+#
+#        if self.nōmen:
+#            nom_sg.append(self.nōmen)
+#            gen_sg.append(self.nōmen_gen)
+#
+#        char = create.create_object(
+#                typeclass = typeclass,
+#                key = nōmina,
+#                home = home,
+#                location = caller.location,
+#                attributes = [
+#                    ('lang', 'latin'),
+#                    ('sexus', self.sexus),
+#                    ('gens', self.gens),
+#                    ('praenōmen', self.praenōmen),
+#                    ('nōmen', self.nōmen),
+#                    ('formae',{
+#                        'nom_sg': nom_sg,
+#                        'gen_sg': gen_sg,
+##                        'nom_sg': [self.praenōmen,self.nōmen],
+##                        'gen_sg': [self.praenōmen_gen,self.nōmen_gen],
+#                        }
+#                        )
+#                    ]
+#                )
+#
+#        caller.location.msg_contents(f"{nōmina} nāt{us_a_um('nom_sg',self.sexus)} est!")
+
 class Nascātur(MuxCommand):
     """
     Create an NPC
 
     Usage:
-        nascātur <praenomen>, [<nomen>], <sexus> = <genitive praenomen>, <genitive nomen>
+        nascātur [<praenomen>, <praenominis>, <sexus>, <typeclass> [= <nōmen>, <nōminis>]]
 
     """
 
@@ -740,6 +852,8 @@ class Nascātur(MuxCommand):
         """
         The command for creating an NPC itself
         """
+
+        usage_message = "nascātur [<praenomen>, <praenominis>, <sexus>, <typeclass> [= <nōmen>, <nōminis>]]"
 
         caller = self.caller
 
@@ -776,24 +890,32 @@ class Nascātur(MuxCommand):
                     self.praenōmen_gen = self.praenōmen[:-2] + 'ī'
             nōmina = self.praenōmen + ' ' + self.nōmen
 
-        elif not self.rhslist:
-            caller.msg("Usage: nascātur [<praenōmen>, [<nōmen>], <sexus> = <praenōminis>, [<nōminis>]]")
-        elif self.lhslist[-1] not in ['māre', 'muliebre', 'neutrum']:
-            caller.msg("Usage: nascātur [<praenōmen>, [<nōmen>], <sexus> = <praenōminis>, [<nōminis>]]")
-        elif len(self.lhslist) > 2 and len(self.rhslist) == 2:
-            self.praenōmen = self.lhslist[0]
-            self.praenōmen_gen = self.rhslist[0]
-            self.nōmen = self.lhslist[1]
-            self.nōmen_gen = self.rhslist[1]
-            self.sexus = self.lhslist[2]
-            if self.sexus == 'muliebre':
-                self.gens = self.nōmen
-            else:
-                self.gens = self.nōmen[:-2] + 'a'
+        elif not self.lhslist:
+            caller.msg("Missing left-hand side")
+            caller.msg(usage_message)
+            return
+        elif len(self.lhslist) != 4:
+            caller.msg("Not enough variables in left hand side")
+            caller.msg(usage_message)
+            return
+        elif self.lhslist[2] not in ['māre', 'muliebre', 'neutrum']:
+            caller.msg("Gender not available")
+            caller.msg(usage_message)
+            return
         else:
             self.praenōmen = self.lhslist[0]
-            self.praenōmen_gen = self.rhslist[0]
-            self.sexus = self.lhslist[1]
+            self.praenōmen_gen = self.lhslist[1]
+            self.sexus = self.lhslist[2]
+            self.typeclass = self.lhslist[3]
+
+            if self.rhslist:
+                if len(self.rhslist) != 2:
+                    caller.msg("Right hand side incomplete")
+                    caller.msg(usage_message)
+                    return
+                else:
+                    self.nōmen = self.rhslist[0]
+                    self.nōmen_gen = self.rhslist[1]
 
         if self.nōmen:
             nōmina = self.praenōmen + ' ' + self.nōmen
@@ -801,7 +923,7 @@ class Nascātur(MuxCommand):
             nōmina = self.praenōmen
 #        home = 56
         home = ObjectDB.objects.get_id(settings.DEFAULT_HOME)
-        typeclass = 'typeclasses.persōnae.Persōna'
+        typeclass = self.typeclass
 
         nom_sg = [self.praenōmen]
         gen_sg = [self.praenōmen_gen]
@@ -810,26 +932,52 @@ class Nascātur(MuxCommand):
             nom_sg.append(self.nōmen)
             gen_sg.append(self.nōmen_gen)
 
-        char = create.create_object(
-                typeclass = typeclass,
-                key = nōmina,
-                home = home,
-                location = caller.location,
-                attributes = [
-                    ('lang', 'latin'),
-                    ('sexus', self.sexus),
-                    ('gens', self.gens),
-                    ('praenōmen', self.praenōmen),
-                    ('nōmen', self.nōmen),
-                    ('formae',{
-                        'nom_sg': nom_sg,
-                        'gen_sg': gen_sg,
-#                        'nom_sg': [self.praenōmen,self.nōmen],
-#                        'gen_sg': [self.praenōmen_gen,self.nōmen_gen],
-                        }
-                        )
-                    ]
-                )
+            if self.sexus == 'muliebre':
+                self.gens = self.nōmen
+            else:
+                self.gens = self.nōmen[:-2] + 'a'
+
+            char = create.create_object(
+                    typeclass = typeclass,
+                    key = nōmina,
+                    home = home,
+                    location = caller.location,
+                    attributes = [
+                        ('lang', 'latin'),
+                        ('sexus', self.sexus),
+                        ('gens', self.gens),
+                        ('praenōmen', self.praenōmen),
+                        ('nōmen', self.nōmen),
+                        ('gens', self.gens),
+                        ('formae',{
+                            'nom_sg': nom_sg,
+                            'gen_sg': gen_sg,
+    #                        'nom_sg': [self.praenōmen,self.nōmen],
+    #                        'gen_sg': [self.praenōmen_gen,self.nōmen_gen],
+                            }
+                            )
+                        ]
+                    )
+        else:
+            char = create.create_object(
+                    typeclass = typeclass,
+                    key = nōmina,
+                    home = home,
+                    location = caller.location,
+                    attributes = [
+                        ('lang', 'latin'),
+                        ('sexus', self.sexus),
+                        ('gens', self.gens),
+                        ('praenōmen', self.praenōmen),
+                        ('formae',{
+                            'nom_sg': nom_sg,
+                            'gen_sg': gen_sg,
+    #                        'nom_sg': [self.praenōmen,self.nōmen],
+    #                        'gen_sg': [self.praenōmen_gen,self.nōmen_gen],
+                            }
+                            )
+                        ]
+                    )
 
         caller.location.msg_contents(f"{nōmina} nāt{us_a_um('nom_sg',self.sexus)} est!")
 
@@ -1484,6 +1632,72 @@ class Solve(MuxCommand):
 
         target.db.descriptive_name = False
 
+class Quaerātur(MuxCommand):
+    """
+    Create a quest object
+
+    Usage:
+        creātur <nōmen>
+
+    """
+
+    key = "quaerātur"
+    aliases = ['quaeratur']
+    locks = "cmd:perm(Builders)"
+    help_category = "Iussa Administrātōrum"
+    auto_help = True
+
+    def parse(self):
+
+        arglist = [arg.strip() for arg in self.args.split()]
+
+        self.arglist = arglist
+
+    def func(self):
+        """
+        Creates the object.
+        """
+
+        caller = self.caller
+
+        # Make sure the proper number of arguments are used
+        if not self.args or len(self.arglist) != 1:
+            caller.msg("Scrībe: creātur <nōmen quaestiōnis>")
+            return
+
+        # create the object
+        name = self.arglist[0]
+#        typeclass = 'rēs'
+        typeclass = f"typeclasses.quaestiōnēs.Quaestiō"
+        
+        # create object (if not a valid typeclass, the default
+        # object typeclass will automatically be used)
+#        lockstring = self.new_obj_lockstring.format(id=caller.id)
+        obj = create.create_object(
+                typeclass,
+                name,
+                caller,
+                home=None,
+                location=None,
+#                locks=lockstring,
+                report_to=caller,
+                attributes=[
+                    ('pp',0),
+                    ('fīnis',''),
+                    ('inceptae',[]),
+                    ('perfectae',[]),
+                    ('quaerēns',None),
+                    ('fīnis','')
+                    ]
+                )
+        message = f"Ā tē nova {obj.typename} creāta est: {obj.name}."
+        if not obj:
+            return
+        if not obj.db.desc:
+            obj.db.desc = "Nihil ēgregiī vidēs."
+
+        caller.msg(message)
+
 class IussaLatīnaCmdSet(default_cmds.CharacterCmdSet):
     """
     Command set for the Latin commands.
@@ -1525,3 +1739,4 @@ class IussaAdministrātōrumCmdSet(default_cmds.CharacterCmdSet):
         self.add(Mūniātur())
         self.add(Nascātur())
         self.add(Aperiātur())
+        self.add(Quaerātur())
